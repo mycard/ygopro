@@ -33,7 +33,9 @@ HostInfo game_info;
 
 void Game::MainServerLoop() {
 	deckManager.LoadLFList();
-	dataManager.LoadDB(L"cards.cdb");
+	if(!dataManager.LoadDB(L"cards.cdb")) {
+		dataManager.LoadDB(L"cdb/cards.cdb");
+	}
 #ifdef SERVER_ZIP_SUPPORT
 	dataManager.FileSystem = new irr::io::CFileSystem();
 	dataManager.FileSystem->addFileArchive("data/script.zip");
