@@ -1190,6 +1190,15 @@ void Game::LoadExpansions() {
 #endif // YGOPRO_SERVER_MODE
 		}
 	}
+#if defined(YGOPRO_SERVER_MODE) && defined(SERVER_ZIP_SUPPORT)
+	FileSystem::TraversalDir(L"./cdb", [](const wchar_t* name, bool isdir) {
+		wchar_t fpath[1024];
+		myswprintf(fpath, L"./cdb/%ls", name);
+		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".cdb", 4) && mywcsncasecmp(name, L"cards.cdb", 9)) {
+			dataManager.LoadDB(fpath);
+		}
+	});
+#endif // YGOPRO_SERVER_MODE
 }
 #ifndef YGOPRO_SERVER_MODE
 void Game::RefreshCategoryDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck, bool selectlastused) {
