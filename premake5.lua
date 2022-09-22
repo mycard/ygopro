@@ -11,6 +11,7 @@ LUA_LIB_NAME = "lua"
 
 SERVER_MODE = true
 USE_IRRKLANG = false
+SERVER_ZIP_SUPPORT = true
 
 -- read settings from command line or environment variables
 
@@ -175,9 +176,7 @@ workspace "YGOPro"
 
     filter "system:windows"
         defines { "WIN32", "_WIN32" }
-if not SERVER_MODE then
         entrypoint "mainCRTStartup"
-end
         systemversion "latest"
         startproject "YGOPro"
         if WINXP_SUPPORT then
@@ -245,7 +244,7 @@ end
     if BUILD_FREETYPE and not SERVER_MODE then
         include "freetype"
     end
-    if BUILD_IRRLICHT and not SERVER_MODE then
+    if BUILD_IRRLICHT and (SERVER_ZIP_SUPPORT or not SERVER_MODE) then
         include "irrlicht"
     end
     if BUILD_SQLITE then

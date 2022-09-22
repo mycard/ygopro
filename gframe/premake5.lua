@@ -19,6 +19,10 @@ if SERVER_MODE then
             "tag_duel.cpp", "tag_duel.h" }
     includedirs { "../ocgcore" }
     links { "ocgcore", "clzma", LUA_LIB_NAME, "sqlite3", "event" }
+    if SERVER_ZIP_SUPPORT then
+        defines { "SERVER_ZIP_SUPPORT" }
+        links { "irrlicht" }
+    end
 else
     kind "WindowedApp"
 

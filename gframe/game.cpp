@@ -15,6 +15,9 @@
 #include "netserver.h"
 #include "single_mode.h"
 #endif //YGOPRO_SERVER_MODE
+#ifdef SERVER_ZIP_SUPPORT
+#include "../irrlicht/source/Irrlicht/CFileSystem.h"
+#endif
 
 const unsigned short PRO_VERSION = 0x1353;
 
@@ -31,6 +34,10 @@ HostInfo game_info;
 void Game::MainServerLoop() {
 	deckManager.LoadLFList();
 	dataManager.LoadDB(L"cards.cdb");
+#ifdef SERVER_ZIP_SUPPORT
+	dataManager.FileSystem = new irr::io::CFileSystem();
+	dataManager.FileSystem->addFileArchive("data/script.zip");
+#endif
 	LoadExpansions();
 	
 	server_port = NetServer::StartServer(server_port);

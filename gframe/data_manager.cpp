@@ -6,7 +6,7 @@ namespace ygo {
 
 const wchar_t* DataManager::unknown_string = L"???";
 byte DataManager::scriptBuffer[0x20000];
-#ifndef YGOPRO_SERVER_MODE
+#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 IFileSystem* DataManager::FileSystem;
 #endif
 DataManager dataManager;
@@ -422,7 +422,7 @@ byte* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 #endif //YGOPRO_SERVER_MODE
 }
 byte* DataManager::ScriptReader(const char* script_name, int* slen) {
-#ifdef YGOPRO_SERVER_MODE
+#if defined(YGOPRO_SERVER_MODE) && !defined(SERVER_ZIP_SUPPORT)
 	FILE* fp = fopen(script_name, "rb");
 	if(!fp)
 		return 0;
