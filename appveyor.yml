@@ -20,9 +20,18 @@ install:
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2022/sqlite-amalgamation-3390300.zip  ; exit 0"
   - 7z x sqlite-amalgamation-3390300.zip
   - move sqlite-amalgamation-3390300 sqlite3
-  
+
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.5.zip ; exit 0"
+  - 7z x irrlicht-1.8.5.zip
+  - move irrlicht-1.8.5 irrlicht
+
   # let premake happy
   - xcopy /E premake\* .
+
+  # patch irrlicht
+  - cd irrlicht
+  - patch -p1 < irrlicht.patch
+  - cd ..
   
   # premake
   - premake5 vs2019
@@ -45,5 +54,6 @@ artifacts:
 cache:
   - premake-5.0.0-beta2-windows.zip
   - libevent-2.0.22-stable.tar.gz
+  - irrlicht-1.8.5.zip
   - lua-5.4.4.tar.gz
   - sqlite-amalgamation-3390300.zip
