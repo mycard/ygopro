@@ -32,14 +32,14 @@ unsigned int pre_seed[3];
 HostInfo game_info;
 
 void Game::MainServerLoop() {
-	deckManager.LoadLFList();
-	if(!dataManager.LoadDB(L"cards.cdb")) {
-		dataManager.LoadDB(L"cdb/cards.cdb");
-	}
 #ifdef SERVER_ZIP_SUPPORT
 	dataManager.FileSystem = new irr::io::CFileSystem();
 	dataManager.FileSystem->addFileArchive("data/script.zip");
 #endif
+	deckManager.LoadLFList();
+	if(!dataManager.LoadDB(L"cards.cdb")) {
+		dataManager.LoadDB(L"cdb/cards.cdb");
+	}
 	LoadExpansions();
 	
 	server_port = NetServer::StartServer(server_port);
@@ -1146,14 +1146,13 @@ void Game::LoadExpansions() {
 		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".cdb", 4)) {
 			dataManager.LoadDB(fpath);
 		}
-#ifdef YGOPRO_SERVER_MODE
-	});
-#else
+#ifndef YGOPRO_SERVER_MODE
 		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".conf", 5)) {
 			char upath[1024];
 			BufferIO::EncodeUTF8(fpath, upath);
 			dataManager.LoadStrings(upath);
 		}
+#endif // YGOPRO_SERVER_MODE
 		if(!isdir && wcsrchr(name, '.') && (!mywcsncasecmp(wcsrchr(name, '.'), L".zip", 4) || !mywcsncasecmp(wcsrchr(name, '.'), L".ypk", 4))) {
 #ifdef _WIN32
 			dataManager.FileSystem->addFileArchive(fpath, true, false, EFAT_ZIP);
@@ -1176,6 +1175,7 @@ void Game::LoadExpansions() {
 #endif
 			if(wcsrchr(fname, '.') && !mywcsncasecmp(wcsrchr(fname, '.'), L".cdb", 4))
 				dataManager.LoadDB(fname);
+#ifndef YGOPRO_SERVER_MODE
 			if(wcsrchr(fname, '.') && !mywcsncasecmp(wcsrchr(fname, '.'), L".conf", 5)) {
 #ifdef _WIN32
 				IReadFile* reader = DataManager::FileSystem->createAndOpenFile(fname);
@@ -1187,9 +1187,9 @@ void Game::LoadExpansions() {
 			if(wcsrchr(fname, '.') && !mywcsncasecmp(wcsrchr(fname, '.'), L".ydk", 4)) {
 				deckBuilder.expansionPacks.push_back(fname);
 			}
+#endif // YGOPRO_SERVER_MODE
 		}
 	}
-#endif //YGOPRO_SERVER_MODE
 }
 #ifndef YGOPRO_SERVER_MODE
 void Game::RefreshCategoryDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck, bool selectlastused) {

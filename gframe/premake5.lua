@@ -1,5 +1,5 @@
 include "lzma/."
-if not SERVER_MODE then
+if (SERVER_ZIP_SUPPORT or not SERVER_MODE) then
 include "spmemvfs/."
 end
 
@@ -21,7 +21,7 @@ if SERVER_MODE then
     links { "ocgcore", "clzma", LUA_LIB_NAME, "sqlite3", "event" }
     if SERVER_ZIP_SUPPORT then
         defines { "SERVER_ZIP_SUPPORT" }
-        links { "irrlicht" }
+        links { "irrlicht", "cspmemvfs" }
     end
 else
     kind "WindowedApp"
