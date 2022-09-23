@@ -1187,6 +1187,7 @@ void Game::LoadExpansions() {
 #endif
 			if(wcsrchr(fname, '.') && !mywcsncasecmp(wcsrchr(fname, '.'), L".cdb", 4))
 				dataManager.LoadDB(fname);
+#ifndef YGOPRO_SERVER_MODE
 			if(wcsrchr(fname, '.') && !mywcsncasecmp(wcsrchr(fname, '.'), L".conf", 5)) {
 #ifdef _WIN32
 				IReadFile* reader = DataManager::FileSystem->createAndOpenFile(fname);
@@ -1198,6 +1199,7 @@ void Game::LoadExpansions() {
 			if(wcsrchr(fname, '.') && !mywcsncasecmp(wcsrchr(fname, '.'), L".ydk", 4)) {
 				deckBuilder.expansionPacks.push_back(fname);
 			}
+#endif // YGOPRO_SERVER_MODE
 		}
 	}
 #endif //SERVER_ZIP_SUPPORT
