@@ -4,6 +4,9 @@
 #include "data_manager.h"
 #include "deck_manager.h"
 #include "replay.h"
+#ifdef SERVER_ZIP_SUPPORT
+#include "../irrlicht/source/Irrlicht/CFileSystem.h"
+#endif
 #else
 #include "image_manager.h"
 #include "data_manager.h"
@@ -15,9 +18,6 @@
 #include "netserver.h"
 #include "single_mode.h"
 #endif //YGOPRO_SERVER_MODE
-#ifdef SERVER_ZIP_SUPPORT
-#include "../irrlicht/source/Irrlicht/CFileSystem.h"
-#endif
 
 const unsigned short PRO_VERSION = 0x1353;
 
