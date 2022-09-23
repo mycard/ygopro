@@ -28,6 +28,21 @@ install:
   # let premake happy
   - xcopy /E premake\* .
 
+  for:
+  -
+    matrix:
+      only:
+        - SERVER_PRO2_SUPPORT: true
+
+    - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.5.zip ; exit 0"
+    - 7z x irrlicht-1.8.5.zip
+    - move irrlicht-1.8.5 irrlicht
+
+    # patch irrlicht
+    - cd irrlicht
+    - patch -p1 < irrlicht.patch
+    - cd ..
+
   # premake
   - premake5 vs2019
   
@@ -44,16 +59,6 @@ for:
   matrix:
     only:
       - SERVER_PRO2_SUPPORT: true
-
-  install:
-    - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.5.zip ; exit 0"
-    - 7z x irrlicht-1.8.5.zip
-    - move irrlicht-1.8.5 irrlicht
-
-    # patch irrlicht
-    - cd irrlicht
-    - patch -p1 < irrlicht.patch
-    - cd ..
 
   after_build:
     - ps: move bin\release\AI.Server.exe .
