@@ -2,6 +2,7 @@ version: '{build}'
 image: Visual Studio 2019
 environment:
   matrix:
+    - SERVER_MODE: true
     - SERVER_PRO2_SUPPORT: true
 
 install:
