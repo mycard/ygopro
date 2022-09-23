@@ -25,25 +25,8 @@ install:
   - 7z x sqlite-amalgamation-3390300.zip
   - move sqlite-amalgamation-3390300 sqlite3
 
-  # let premake happy
+before_build:
   - xcopy /E premake\* .
-
-  for:
-  -
-    matrix:
-      only:
-        - SERVER_PRO2_SUPPORT: true
-
-    - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.5.zip ; exit 0"
-    - 7z x irrlicht-1.8.5.zip
-    - move irrlicht-1.8.5 irrlicht
-
-    # patch irrlicht
-    - cd irrlicht
-    - patch -p1 < irrlicht.patch
-    - cd ..
-
-  # premake
   - premake5 vs2019
   
 configuration: Release
@@ -59,6 +42,19 @@ for:
   matrix:
     only:
       - SERVER_PRO2_SUPPORT: true
+
+  before_build:
+    - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name http://downloads.sourceforge.net/irrlicht/irrlicht-1.8.5.zip ; exit 0"
+    - 7z x irrlicht-1.8.5.zip
+    - move irrlicht-1.8.5 irrlicht
+
+    - xcopy /E premake\* .
+
+    - cd irrlicht
+    - patch -p1 < irrlicht.patch
+    - cd ..
+
+    - premake5 vs2019
 
   after_build:
     - ps: move bin\release\AI.Server.exe .
