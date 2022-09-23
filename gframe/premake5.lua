@@ -23,6 +23,9 @@ if SERVER_MODE then
         defines { "SERVER_ZIP_SUPPORT" }
         links { "irrlicht", "cspmemvfs" }
     end
+    if SERVER_PRO2_SUPPORT then
+        defines { "SERVER_PRO2_SUPPORT" }
+    end
 else
     kind "WindowedApp"
 
@@ -76,6 +79,9 @@ end
         files "ygopro.rc"
 if not SERVER_MODE then
         libdirs { "$(DXSDK_DIR)Lib/x86" }
+end
+if SERVER_PRO2_SUPPORT then
+        targetname ("AI.Server")
 end
         if USE_IRRKLANG then
             links { "irrKlang" }

@@ -34,12 +34,12 @@ HostInfo game_info;
 void Game::MainServerLoop() {
 #ifdef SERVER_ZIP_SUPPORT
 	dataManager.FileSystem = new irr::io::CFileSystem();
+#endif
+#ifdef SERVER_PRO2_SUPPORT
 	dataManager.FileSystem->addFileArchive("data/script.zip");
 #endif
 	deckManager.LoadLFList();
-	if(!dataManager.LoadDB(L"cards.cdb")) {
-		dataManager.LoadDB(L"cdb/cards.cdb");
-	}
+	dataManager.LoadDB(L"cards.cdb");
 	LoadExpansions();
 	
 	server_port = NetServer::StartServer(server_port);
@@ -1140,6 +1140,15 @@ std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, u32 cWidth,
 }
 #endif //YGOPRO_SERVER_MODE
 void Game::LoadExpansions() {
+#ifdef SERVER_PRO2_SUPPORT
+	FileSystem::TraversalDir(L"./cdb", [](const wchar_t* name, bool isdir) {
+		wchar_t fpath[1024];
+		myswprintf(fpath, L"./cdb/%ls", name);
+		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".cdb", 4)) {
+			dataManager.LoadDB(fpath);
+		}
+	});
+#endif // SERVER_PRO2_SUPPORT
 	FileSystem::TraversalDir(L"./expansions", [](const wchar_t* name, bool isdir) {
 		wchar_t fpath[1024];
 		myswprintf(fpath, L"./expansions/%ls", name);
@@ -1190,15 +1199,6 @@ void Game::LoadExpansions() {
 #endif // YGOPRO_SERVER_MODE
 		}
 	}
-#if defined(YGOPRO_SERVER_MODE) && defined(SERVER_ZIP_SUPPORT)
-	FileSystem::TraversalDir(L"./cdb", [](const wchar_t* name, bool isdir) {
-		wchar_t fpath[1024];
-		myswprintf(fpath, L"./cdb/%ls", name);
-		if(!isdir && wcsrchr(name, '.') && !mywcsncasecmp(wcsrchr(name, '.'), L".cdb", 4) && mywcsncasecmp(name, L"cards.cdb", 9)) {
-			dataManager.LoadDB(fpath);
-		}
-	});
-#endif // YGOPRO_SERVER_MODE
 }
 #ifndef YGOPRO_SERVER_MODE
 void Game::RefreshCategoryDeck(irr::gui::IGUIComboBox* cbCategory, irr::gui::IGUIComboBox* cbDeck, bool selectlastused) {
