@@ -43,13 +43,13 @@ build:
     parallel: true
 
 after_build:
-  - ps: move bin\release\YGOPro.exe .
+  - ps: move bin\release\AI.Server.exe .
 
 test: off
 
 artifacts:
-  - path: YGOPro.exe
-    name: YGOPro(server)
+  - path: AI.Server.exe
+    name: YGOPro server for YGOPro2 AI
 
 cache:
   - premake-5.0.0-beta2-windows.zip
