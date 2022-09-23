@@ -51,7 +51,7 @@ void DeckManager::LoadLFListSingle(const char* path) {
 	}
 }
 void DeckManager::LoadLFList() {
-#ifdef YGOPRO_SERVER_MODE
+#ifdef SERVER_PRO2_SUPPORT
 	LoadLFListSingle("config/lflist.conf");
 #endif
 	LoadLFListSingle("expansions/lflist.conf");

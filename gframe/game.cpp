@@ -1162,7 +1162,7 @@ void Game::LoadExpansions() {
 			dataManager.LoadStrings(upath);
 		}
 #endif // YGOPRO_SERVER_MODE
-#ifdef SERVER_ZIP_SUPPORT
+#if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
 		if(!isdir && wcsrchr(name, '.') && (!mywcsncasecmp(wcsrchr(name, '.'), L".zip", 4) || !mywcsncasecmp(wcsrchr(name, '.'), L".ypk", 4))) {
 #ifdef _WIN32
 			dataManager.FileSystem->addFileArchive(fpath, true, false, EFAT_ZIP);
@@ -1174,7 +1174,7 @@ void Game::LoadExpansions() {
 		}
 #endif //SERVER_ZIP_SUPPORT
 	});
-#ifdef SERVER_ZIP_SUPPORT
+#if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
 	for(u32 i = 0; i < DataManager::FileSystem->getFileArchiveCount(); ++i) {
 		const IFileList* archive = DataManager::FileSystem->getFileArchive(i)->getFileList();
 		for(u32 j = 0; j < archive->getFileCount(); ++j) {
