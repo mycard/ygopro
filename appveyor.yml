@@ -46,14 +46,20 @@ build:
     project: build/YGOPro.sln
     parallel: true
 
-after_build:
-  - ps: move bin\release\YGOPro.exe .
-
 test: off
 
-artifacts:
-  - path: YGOPro.exe
-    name: YGOPro(server)
+for:
+-
+  matrix:
+    only:
+      - SERVER_PRO2_SUPPORT: true
+
+  after_build:
+    - ps: move bin\release\AI.Server.exe .
+
+  artifacts:
+    - path: AI.Server.exe
+      name: YGOPro server for YGOPro2 AI
 
 cache:
   - premake-5.0.0-beta2-windows.zip
