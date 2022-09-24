@@ -256,8 +256,11 @@ end
     if BUILD_FREETYPE and not SERVER_MODE then
         include "freetype"
     end
-    if BUILD_IRRLICHT and (SERVER_ZIP_SUPPORT or not SERVER_MODE) then
+    if BUILD_IRRLICHT and not SERVER_MODE then
         include "irrlicht"
+    end
+    if BUILD_IRRLICHT and SERVER_MODE and SERVER_ZIP_SUPPORT then
+        include "irrlicht/premake5-only-zipreader.lua"
     end
     if BUILD_SQLITE then
         include "sqlite3"

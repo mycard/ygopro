@@ -22,6 +22,9 @@ if SERVER_MODE then
     if SERVER_ZIP_SUPPORT then
         defines { "SERVER_ZIP_SUPPORT" }
         links { "irrlicht", "cspmemvfs" }
+        if BUILD_IRRLICHT then
+            includedirs { "../irrlicht/source/Irrlicht" }
+        end
     end
     if SERVER_PRO2_SUPPORT then
         defines { "SERVER_PRO2_SUPPORT" }

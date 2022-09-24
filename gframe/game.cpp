@@ -5,7 +5,13 @@
 #include "deck_manager.h"
 #include "replay.h"
 #ifdef SERVER_ZIP_SUPPORT
-#include "../irrlicht/source/Irrlicht/CFileSystem.h"
+#include "CFileSystem.h"
+namespace irr {
+	namespace core {
+		// taken from Irrlicht.cpp beacuse that file is not included
+		irr::core::stringc LOCALE_DECIMAL_POINTS(".");
+	}
+}
 #endif
 #else
 #include "image_manager.h"
