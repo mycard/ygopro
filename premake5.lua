@@ -1,6 +1,6 @@
 -- default global settings
 
-BUILD_LUA = true
+BUILD_LUA = false
 BUILD_EVENT = os.istarget("windows")
 BUILD_FREETYPE = os.istarget("windows")
 BUILD_SQLITE = os.istarget("windows")
