@@ -1,6 +1,6 @@
 [submodule "ocgcore"]
 	path = ocgcore
-	url = https://github.com/mycard/ygopro-core
+	url = https://github.com/I-linmeng-I/ygopro-core-random.git
 [submodule "script"]
 	path = script
 	url = https://github.com/mycard/ygopro-scripts
