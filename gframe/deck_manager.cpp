@@ -2,6 +2,15 @@
 #include "data_manager.h"
 #include "network.h"
 #include "game.h"
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <algorithm> // For std::shuffle, std::copy_if
+#include <vector>
+#include <random>
+#include <unordered_set>
 
 namespace ygo {
 
