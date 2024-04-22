@@ -675,7 +675,9 @@ void TagDuel::DuelEndProc() {
 #endif
 }
 void TagDuel::Surrender(DuelPlayer* dp) {
-	return;
+	EndDuel();
+	DuelEndProc();
+	event_del(etimer);
 }
 int TagDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 	unsigned char* offset, *pbufw, *pbuf = msgbuffer;

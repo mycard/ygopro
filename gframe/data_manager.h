@@ -13,6 +13,11 @@ namespace ygo {
 
 class DataManager {
 public:
+
+    const std::unordered_map<unsigned int, CardDataC>& GetAllCardsData() const {
+        return _datas;
+    }
+    
 	DataManager();
 	bool LoadDB(const wchar_t* wfile);
 	bool LoadStrings(const char* file);

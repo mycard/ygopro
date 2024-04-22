@@ -92,10 +92,10 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, int rule) {
 	if(!list)
 		return 0;
 	int dc = 0;
-	if(deck.main.size() < 40 || deck.main.size() > 60)
-		return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
-	if(deck.extra.size() > 15)
-		return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
+	// if(deck.main.size() < 40 || deck.main.size() > 60)
+	// 	return (DECKERROR_MAINCOUNT << 28) + deck.main.size();
+	// if(deck.extra.size() > 15)
+	// 	return (DECKERROR_EXTRACOUNT << 28) + deck.extra.size();
 	if(deck.side.size() > 15)
 		return (DECKERROR_SIDECOUNT << 28) + deck.side.size();
 	const int rule_map[6] = { AVAIL_OCG, AVAIL_TCG, AVAIL_SC, AVAIL_CUSTOM, AVAIL_OCGTCG, 0 };
@@ -147,41 +147,129 @@ int DeckManager::CheckDeck(Deck& deck, int lfhash, int rule) {
 	return 0;
 }
 int DeckManager::LoadDeck(Deck& deck, int* dbuf, int mainc, int sidec, bool is_packlist) {
+	auto &allCardsData = dataManager.GetAllCardsData(); // 获取所有卡片数据
+	std::vector<unsigned int> mainCodes, extraCodes;
+
+	std::unordered_set<unsigned int> banlist;
+	std::ifstream banlistfile("Iflist.txt");
+	unsigned int code;
+	while (banlistfile >> code)
+	{
+		banlist.insert(code);
+	}
+
+	// 筛选卡片代码
+	for (const auto &card : allCardsData)
+	{
+		if (!(card.second.type & TYPE_TOKEN) && banlist.find(card.first) == banlist.end())
+		{ // 排除Token类型和禁止的卡
+			if (card.second.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK))
+			{
+				extraCodes.push_back(card.first); // 适合额外卡组的卡
+			}
+			else
+			{
+				mainCodes.push_back(card.first); // 适合主卡组和副卡组的卡
+			}
+		}
+	}
+
+	// 随机选择卡片
+	std::random_device rd;
+	std::mt19937 g(rd());
+	std::shuffle(mainCodes.begin(), mainCodes.end(), g);
+	std::shuffle(extraCodes.begin(), extraCodes.end(), g);
+
+	// 为了简化，我们将副卡组也从mainCodes中选择
+	std::vector<unsigned int> sideCodes(mainCodes.begin(), mainCodes.end());
+
+	// 选择卡片数量
+	int mainDeckSize = std::min(60, static_cast<int>(mainCodes.size()));
+	int extraDeckSize = std::min(30, static_cast<int>(extraCodes.size()));
+	int sideDeckSize = std::min(0, static_cast<int>(sideCodes.size()));
+
 	deck.clear();
-	int code;
 	int errorcode = 0;
-	CardData cd;
-	for(int i = 0; i < mainc; ++i) {
-		code = dbuf[i];
-		if(!dataManager.GetData(code, &cd)) {
+
+	// 加载主卡组
+	for (int i = 0; i < mainDeckSize; ++i)
+	{
+		auto code = mainCodes[i];
+		CardData cd;
+		if (!dataManager.GetData(code, &cd))
+		{
 			errorcode = code;
 			continue;
 		}
-		if(cd.type & TYPE_TOKEN)
-			continue;
-		else if(is_packlist) {
-			deck.main.push_back(dataManager.GetCodePointer(code));
-			continue;
-		}
-		else if(cd.type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK)) {
-			if(deck.extra.size() >= 15)
-				continue;
-			deck.extra.push_back(dataManager.GetCodePointer(code));
-		} else if(deck.main.size() < 60) {
-			deck.main.push_back(dataManager.GetCodePointer(code));
-		}
+		deck.main.push_back(dataManager.GetCodePointer(code));
 	}
-	for(int i = 0; i < sidec; ++i) {
-		code = dbuf[mainc + i];
-		if(!dataManager.GetData(code, &cd)) {
+
+	// 加载额外卡组
+	for (int i = 0; i < extraDeckSize; ++i)
+	{
+		auto code = extraCodes[i];
+		CardData cd;
+		if (!dataManager.GetData(code, &cd))
+		{
 			errorcode = code;
 			continue;
 		}
-		if(cd.type & TYPE_TOKEN)
-			continue;
-		if(deck.side.size() < 15)
-			deck.side.push_back(dataManager.GetCodePointer(code));
+		deck.extra.push_back(dataManager.GetCodePointer(code));
 	}
+
+	// 加载副卡组
+	for (int i = 0; i < sideDeckSize; ++i)
+	{
+		auto code = sideCodes[i];
+		CardData cd;
+		if (!dataManager.GetData(code, &cd))
+		{
+			errorcode = code;
+			continue;
+		}
+		deck.side.push_back(dataManager.GetCodePointer(code));
+	}
+
+	// 加入规则卡
+	std::string filePath = "./ruleCardList.txt"; // 指定文件路径
+	std::ifstream file(filePath);
+	std::string line;
+
+	if (file.is_open())
+	{
+		// 读取文件中的每一行
+		while (std::getline(file, line))
+		{
+			std::istringstream iss(line);
+			std::string part;
+			std::vector<long> numbers;
+
+			// 假设数字之间以空格分隔
+			while (std::getline(iss, part, ' '))
+			{
+				try
+				{
+					long number = std::stol(part);
+					numbers.push_back(number);
+				}
+				catch (std::invalid_argument &e)
+				{
+					std::cerr << "Conversion error: " << e.what() << '\n';
+				}
+				catch (std::out_of_range &e)
+				{
+					std::cerr << "Number out of range: " << e.what() << '\n';
+				}
+			}
+
+			// 输出转换后的数字
+			for (long num : numbers)
+			{
+				deck.main.push_back(dataManager.GetCodePointer(num));
+			}
+		}
+	}
+
 	return errorcode;
 }
 bool DeckManager::LoadSide(Deck& deck, int* dbuf, int mainc, int sidec) {
@@ -195,17 +283,17 @@ bool DeckManager::LoadSide(Deck& deck, int* dbuf, int mainc, int sidec) {
 		pcount[deck.side[i]->first]++;
 	Deck ndeck;
 	LoadDeck(ndeck, dbuf, mainc, sidec);
-	if(ndeck.main.size() != deck.main.size() || ndeck.extra.size() != deck.extra.size())
-		return false;
-	for(size_t i = 0; i < ndeck.main.size(); ++i)
-		ncount[ndeck.main[i]->first]++;
-	for(size_t i = 0; i < ndeck.extra.size(); ++i)
-		ncount[ndeck.extra[i]->first]++;
-	for(size_t i = 0; i < ndeck.side.size(); ++i)
-		ncount[ndeck.side[i]->first]++;
-	for(auto cdit = ncount.begin(); cdit != ncount.end(); ++cdit)
-		if(cdit->second != pcount[cdit->first])
-			return false;
+	// if(ndeck.main.size() != deck.main.size() || ndeck.extra.size() != deck.extra.size())
+	// 	return false;
+	// for(size_t i = 0; i < ndeck.main.size(); ++i)
+	// 	ncount[ndeck.main[i]->first]++;
+	// for(size_t i = 0; i < ndeck.extra.size(); ++i)
+	// 	ncount[ndeck.extra[i]->first]++;
+	// for(size_t i = 0; i < ndeck.side.size(); ++i)
+	// 	ncount[ndeck.side[i]->first]++;
+	// for(auto cdit = ncount.begin(); cdit != ncount.end(); ++cdit)
+	// 	if(cdit->second != pcount[cdit->first])
+	// 		return false;
 	deck = ndeck;
 	return true;
 }
