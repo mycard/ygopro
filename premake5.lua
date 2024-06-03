@@ -12,6 +12,7 @@ LUA_LIB_NAME = "lua"
 SERVER_MODE = true
 SERVER_ZIP_SUPPORT = false
 SERVER_PRO2_SUPPORT = false
+SERVER_TAG_SURRENDER_CONFIRM = false
 USE_IRRKLANG = false
 
 -- read settings from command line or environment variables
@@ -60,9 +61,45 @@ newoption { trigger = "mac-arm", category = "YGOPro", description = "M1" }
 newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
+newoption { trigger = "server-tag-surrender-confirm", category = "YGOPro - server", description = "" }
+
+boolOptions = {
+    "no-lua-safe",
+    "no-side-check"
+}
+
+for _, boolOption in ipairs(boolOptions) do
+    newoption { trigger = boolOption, category = "YGOPro - options", description = "" }
+end
+
+numberOptions = {
+    "default-duel-rule",
+    "max-deck",
+    "min-deck",
+    "max-extra",
+    "max-side",
+}
+for _, numberOption in ipairs(numberOptions) do
+    newoption { trigger = numberOption, category = "YGOPro - options", description = "", value = "NUMBER" }
+end
 
 function GetParam(param)
     return _OPTIONS[param] or os.getenv(string.upper(string.gsub(param,"-","_")))
+end
+
+function ApplyBoolean(param)
+    if GetParam(param) then
+        defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) }
+    end
+end
+
+function ApplyNumber(param)
+    local value = GetParam(param)
+    if not value then return end
+    local numberValue = tonumber(value)
+    if numberValue then
+        defines { "YGOPRO_" .. string.upper(string.gsub(param,"-","_")) .. "=" .. numberValue }
+    end
 end
 
 if GetParam("build-lua") then
@@ -169,7 +206,6 @@ if GetParam("mac-arm") and os.istarget("macosx") then
 end
 if GetParam("server-mode") then
     SERVER_MODE = true
-    SERVER_ZIP_SUPPORT = false
 end
 if GetParam("server-zip-support") then
     SERVER_ZIP_SUPPORT = true
@@ -178,6 +214,9 @@ if GetParam("server-pro2-support") then
     SERVER_PRO2_SUPPORT = true
     SERVER_ZIP_SUPPORT = true
 end
+if GetParam("server-tag-surrender-confirm") then
+    SERVER_TAG_SURRENDER_CONFIRM = true
+end
 
 workspace "YGOPro"
     location "build"
@@ -185,6 +224,14 @@ workspace "YGOPro"
     objdir "obj"
 
     configurations { "Release", "Debug" }
+
+    for _, numberOption in ipairs(numberOptions) do
+        ApplyNumber(numberOption)
+    end
+
+    for _, boolOption in ipairs(boolOptions) do
+        ApplyBoolean(boolOption)
+    end
 
     filter "system:windows"
         defines { "WIN32", "_WIN32" }
@@ -223,7 +270,7 @@ end
     filter { "configurations:Release", "action:vs*" }
         flags { "LinkTimeOptimization" }
         staticruntime "On"
-        disablewarnings { "4244", "4267", "4838", "4577", "4819", "4018", "4996", "4477", "4091", "4828", "4800", "6011", "6031", "6054", "6262" }
+        disablewarnings { "4244", "4267", "4838", "4577", "4018", "4996", "4477", "4091", "4800", "6011", "6031", "6054", "6262" }
 
     filter { "configurations:Release", "not action:vs*" }
         symbols "On"
@@ -233,7 +280,7 @@ end
         end
 
     filter { "configurations:Debug", "action:vs*" }
-        disablewarnings { "4819", "4828", "6011", "6031", "6054", "6262" }
+        disablewarnings { "6011", "6031", "6054", "6262" }
 
     filter "action:vs*"
         vectorextensions "SSE2"

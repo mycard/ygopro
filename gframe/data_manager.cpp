@@ -83,7 +83,7 @@ bool DataManager::LoadDB(const wchar_t* wfile) {
 					if (len > SIZE_SETCODE)
 						len = SIZE_SETCODE;
 					if (len)
-						memcpy(cd.setcode, it->second.data(), len * sizeof(uint16_t));
+						std::memcpy(cd.setcode, it->second.data(), len * sizeof(uint16_t));
 				}
 				else
 					cd.set_setcode(setcode);
@@ -169,24 +169,30 @@ bool DataManager::LoadStrings(IReadFile* reader) {
 void DataManager::ReadStringConfLine(const char* linebuf) {
 	if(linebuf[0] != '!')
 		return;
-	char strbuf[256];
-	int value;
-	wchar_t strBuffer[4096];
-	sscanf(linebuf, "!%s", strbuf);
+	char strbuf[256]{};
+	int value{};
+	wchar_t strBuffer[4096]{};
+	if (sscanf(linebuf, "!%63s", strbuf) != 1)
+		return;
 	if(!strcmp(strbuf, "system")) {
-		sscanf(&linebuf[7], "%d %240[^\n]", &value, strbuf);
+		if (sscanf(&linebuf[7], "%d %240[^\n]", &value, strbuf) != 2)
+			return;
 		BufferIO::DecodeUTF8(strbuf, strBuffer);
 		_sysStrings[value] = strBuffer;
 	} else if(!strcmp(strbuf, "victory")) {
-		sscanf(&linebuf[8], "%x %240[^\n]", &value, strbuf);
+		if (sscanf(&linebuf[8], "%x %240[^\n]", &value, strbuf) != 2)
+			return;
 		BufferIO::DecodeUTF8(strbuf, strBuffer);
 		_victoryStrings[value] = strBuffer;
 	} else if(!strcmp(strbuf, "counter")) {
-		sscanf(&linebuf[8], "%x %240[^\n]", &value, strbuf);
+		if (sscanf(&linebuf[8], "%x %240[^\n]", &value, strbuf) != 2)
+			return;
 		BufferIO::DecodeUTF8(strbuf, strBuffer);
 		_counterStrings[value] = strBuffer;
 	} else if(!strcmp(strbuf, "setname")) {
-		sscanf(&linebuf[8], "%x %240[^\t\n]", &value, strbuf);//using tab for comment
+		//using tab for comment
+		if (sscanf(&linebuf[8], "%x %240[^\t\n]", &value, strbuf) != 2)
+			return;
 		BufferIO::DecodeUTF8(strbuf, strBuffer);
 		_setnameStrings[value] = strBuffer;
 	}
@@ -219,7 +225,7 @@ bool DataManager::GetData(unsigned int code, CardData* pData) {
 	if (pData) {
 		pData->code = data.code;
 		pData->alias = data.alias;
-		memcpy(pData->setcode, data.setcode, SIZE_SETCODE);
+		std::memcpy(pData->setcode, data.setcode, SIZE_SETCODE);
 		pData->type = data.type;
 		pData->level = data.level;
 		pData->attribute = data.attribute;
@@ -238,7 +244,7 @@ code_pointer DataManager::GetCodePointer(unsigned int code) const {
 string_pointer DataManager::GetStringPointer(unsigned int code) const {
 	return _strings.find(code);
 }
-bool DataManager::GetString(int code, CardString* pStr) {
+bool DataManager::GetString(unsigned int code, CardString* pStr) {
 	auto csit = _strings.find(code);
 	if(csit == _strings.end()) {
 		pStr->name = unknown_string;
@@ -248,7 +254,7 @@ bool DataManager::GetString(int code, CardString* pStr) {
 	*pStr = csit->second;
 	return true;
 }
-const wchar_t* DataManager::GetName(int code) {
+const wchar_t* DataManager::GetName(unsigned int code) {
 	auto csit = _strings.find(code);
 	if(csit == _strings.end())
 		return unknown_string;
@@ -256,7 +262,7 @@ const wchar_t* DataManager::GetName(int code) {
 		return csit->second.name.c_str();
 	return unknown_string;
 }
-const wchar_t* DataManager::GetText(int code) {
+const wchar_t* DataManager::GetText(unsigned int code) {
 	auto csit = _strings.find(code);
 	if(csit == _strings.end())
 		return unknown_string;
@@ -265,7 +271,7 @@ const wchar_t* DataManager::GetText(int code) {
 	return unknown_string;
 }
 const wchar_t* DataManager::GetDesc(unsigned int strCode) {
-	if(strCode < 10000u)
+	if (strCode < (MIN_CARD_ID << 4))
 		return GetSysString(strCode);
 	unsigned int code = (strCode >> 4) & 0x0fffffff;
 	unsigned int offset = strCode & 0xf;
@@ -277,7 +283,7 @@ const wchar_t* DataManager::GetDesc(unsigned int strCode) {
 	return unknown_string;
 }
 const wchar_t* DataManager::GetSysString(int code) {
-	if(code < 0 || code >= 2048)
+	if (code < 0 || code > MAX_STRING_ID)
 		return unknown_string;
 	auto csit = _sysStrings.find(code);
 	if(csit == _sysStrings.end())
@@ -302,13 +308,22 @@ const wchar_t* DataManager::GetSetName(int code) {
 		return NULL;
 	return csit->second.c_str();
 }
-unsigned int DataManager::GetSetCode(const wchar_t* setname) {
+std::vector<unsigned int> DataManager::GetSetCodes(std::wstring setname) {
+	std::vector<unsigned int> matchingCodes;
 	for(auto csit = _setnameStrings.begin(); csit != _setnameStrings.end(); ++csit) {
 		auto xpos = csit->second.find_first_of(L'|');//setname|another setname or extra info
-		if(csit->second.compare(0, xpos, setname) == 0 || csit->second.compare(xpos + 1, csit->second.length(), setname) == 0)
-			return csit->first;
+		if(setname.size() < 2) {
+			if(csit->second.compare(0, xpos, setname) == 0
+				|| csit->second.compare(xpos + 1, csit->second.length(), setname) == 0)
+				matchingCodes.push_back(csit->first);
+		} else {
+			if(csit->second.substr(0, xpos).find(setname) != std::wstring::npos
+				|| csit->second.substr(xpos + 1).find(setname) != std::wstring::npos) {
+				matchingCodes.push_back(csit->first);
+			}
+		}
 	}
-	return 0;
+	return matchingCodes;
 }
 const wchar_t* DataManager::GetNumString(int num, bool bracket) {
 	if(!bracket)
@@ -449,14 +464,14 @@ byte* DataManager::ScriptReaderEx(const char* script_name, int* slen) {
 	else
 		return ScriptReader(third, slen);
 #else
-	char first[256];
-	char second[256];
+	char first[256]{};
+	char second[256]{};
 	if(mainGame->gameConf.prefer_expansion_script) {
-		sprintf(first, "expansions/%s", script_name + 2);
-		sprintf(second, "%s", script_name + 2);
+		snprintf(first, sizeof first, "expansions/%s", script_name + 2);
+		snprintf(second, sizeof second, "%s", script_name + 2);
 	} else {
-		sprintf(first, "%s", script_name + 2);
-		sprintf(second, "expansions/%s", script_name + 2);
+		snprintf(first, sizeof first, "%s", script_name + 2);
+		snprintf(second, sizeof second, "expansions/%s", script_name + 2);
 	}
 	if(ScriptReader(first, slen))
 		return scriptBuffer;
@@ -476,7 +491,7 @@ byte* DataManager::ScriptReader(const char* script_name, int* slen) {
 	*slen = len;
 #else
 #ifdef _WIN32
-	wchar_t fname[256];
+	wchar_t fname[256]{};
 	BufferIO::DecodeUTF8(script_name, fname);
 	IReadFile* reader = FileSystem->createAndOpenFile(fname);
 #else
