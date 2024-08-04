@@ -6,7 +6,9 @@
 
 namespace ygo {
 
+#ifndef YGOPRO_SERVER_MODE
 char DeckManager::deckBuffer[0x10000]{};
+#endif
 DeckManager deckManager;
 
 void DeckManager::LoadLFListSingle(const char* path) {
@@ -49,6 +51,9 @@ void DeckManager::LoadLFListSingle(const char* path) {
 	}
 }
 void DeckManager::LoadLFList() {
+#ifdef SERVER_PRO2_SUPPORT
+	LoadLFListSingle("config/lflist.conf");
+#endif
 	LoadLFListSingle("expansions/lflist.conf");
 	LoadLFListSingle("lflist.conf");
 	LFList nolimit;
@@ -190,20 +195,25 @@ bool DeckManager::LoadSide(Deck& deck, int* dbuf, int mainc, int sidec) {
 		pcount[deck.side[i]->first]++;
 	Deck ndeck;
 	LoadDeck(ndeck, dbuf, mainc, sidec);
+#ifndef YGOPRO_NO_SIDE_CHECK
 	if(ndeck.main.size() != deck.main.size() || ndeck.extra.size() != deck.extra.size())
 		return false;
+#endif
 	for(size_t i = 0; i < ndeck.main.size(); ++i)
 		ncount[ndeck.main[i]->first]++;
 	for(size_t i = 0; i < ndeck.extra.size(); ++i)
 		ncount[ndeck.extra[i]->first]++;
 	for(size_t i = 0; i < ndeck.side.size(); ++i)
 		ncount[ndeck.side[i]->first]++;
+#ifndef YGOPRO_NO_SIDE_CHECK
 	for(auto cdit = ncount.begin(); cdit != ncount.end(); ++cdit)
 		if(cdit->second != pcount[cdit->first])
 			return false;
+#endif
 	deck = ndeck;
 	return true;
 }
+#ifndef YGOPRO_SERVER_MODE
 void DeckManager::GetCategoryPath(wchar_t* ret, int index, const wchar_t* text) {
 	wchar_t catepath[256];
 	switch(index) {
@@ -373,4 +383,5 @@ bool DeckManager::DeleteCategory(const wchar_t* name) {
 		return false;
 	return FileSystem::DeleteDir(localname);
 }
+#endif //YGOPRO_SERVER_MODE
 }

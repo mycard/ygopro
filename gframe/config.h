@@ -53,7 +53,10 @@ inline int myswprintf(wchar_t(&buf)[N], const wchar_t* fmt, TR... args) {
 	return swprintf(buf, N, fmt, args...);
 }
 
+#ifndef YGOPRO_SERVER_MODE
 #include <irrlicht.h>
+#endif //YGOPRO_SERVER_MODE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -63,12 +66,20 @@ inline int myswprintf(wchar_t(&buf)[N], const wchar_t* fmt, TR... args) {
 #include "../ocgcore/ocgapi.h"
 #include "../ocgcore/common.h"
 
+#ifndef YGOPRO_SERVER_MODE
 using namespace irr;
 using namespace core;
 using namespace scene;
 using namespace video;
 using namespace io;
 using namespace gui;
+#endif //YGOPRO_SERVER_MODE
+
+#ifdef SERVER_ZIP_SUPPORT
+#include <irrlicht.h>
+using namespace irr;
+using namespace io;
+#endif
 
 extern const unsigned short PRO_VERSION;
 extern unsigned int enable_log;
