@@ -50,7 +50,7 @@ void SingleDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater)
 		}
 		CTOS_JoinGame packet;
 		std::memcpy(&packet, pdata, sizeof packet);
-		const auto* pkt = &packet;
+		auto pkt = &packet;
 		if(pkt->version != PRO_VERSION) {
 			STOC_ErrorMsg scem;
 			scem.msg = ERRMSG_VERERROR;
@@ -60,6 +60,7 @@ void SingleDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater)
 			return;
 		}
 		wchar_t jpass[20];
+		BufferIO::NullTerminate(pkt->pass);
 		BufferIO::CopyWStr(pkt->pass, jpass, 20);
 #ifdef YGOPRO_SERVER_MODE
 		if(!wcscmp(jpass, L"the Big Brother") && !cache_recorder) {
@@ -402,7 +403,12 @@ void SingleDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 		valid = false;
 	else if (sidec < 0 || sidec > SIDEC_MAX)
 		valid = false;
-	else if (deck_size != (mainc + sidec) * (int)sizeof(int32_t))
+	else if
+#ifdef YGOPRO_SERVER_MODE
+(deck_size < (mainc + sidec) * (int)sizeof(int32_t) || deck_size > MAINC_MAX + SIDEC_MAX)
+#else
+(deck_size != (mainc + sidec) * (int)sizeof(int32_t))
+#endif
 		valid = false;
 	if (!valid) {
 		STOC_ErrorMsg scem;
@@ -571,7 +577,7 @@ void SingleDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 #ifdef YGOPRO_SERVER_MODE
 	preload_script(pduel, "./script/special.lua", 0);
 #endif
-	int opt = (int)host_info.duel_rule << 16;
+	unsigned int opt = (unsigned int)host_info.duel_rule << 16;
 	if(host_info.no_shuffle_deck)
 		opt |= DUEL_PSEUDO_SHUFFLE;
 	last_replay.WriteInt32(host_info.start_lp, false);
@@ -1780,7 +1786,7 @@ int SingleDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 	return 0;
 }
 void SingleDuel::GetResponse(DuelPlayer* dp, unsigned char* pdata, unsigned int len) {
-	byte resb[SIZE_RETURN_VALUE];
+	byte resb[SIZE_RETURN_VALUE]{};
 	if (len > SIZE_RETURN_VALUE)
 		len = SIZE_RETURN_VALUE;
 	std::memcpy(resb, pdata, len);
@@ -1959,7 +1965,7 @@ if(!dp || dp == players[player])
 			continue;
 		auto position = GetPosition(qbuf, 8);
 		if (position & POS_FACEDOWN)
-			memset(qbuf, 0, clen - 4);
+			std::memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
 	}
 #ifdef YGOPRO_SERVER_MODE
@@ -2002,7 +2008,7 @@ if(!dp || dp == players[player])
 			continue;
 		auto position = GetPosition(qbuf, 8);
 		if (position & POS_FACEDOWN)
-			memset(qbuf, 0, clen - 4);
+			std::memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
 	}
 #ifdef YGOPRO_SERVER_MODE
@@ -2045,7 +2051,7 @@ if(!dp || dp == players[player])
 			continue;
 		auto position = GetPosition(qbuf, 8);
 		if(!(position & POS_FACEUP))
-			memset(qbuf, 0, slen - 4);
+			std::memset(qbuf, 0, slen - 4);
 		qbuf += slen - 4;
 	}
 #ifdef YGOPRO_SERVER_MODE
@@ -2174,7 +2180,7 @@ void SingleDuel::RefreshSingle(int player, int location, int sequence, int flag)
 	if (position & POS_FACEDOWN) {
 		BufferIO::WriteInt32(qbuf, QUERY_CODE);
 		BufferIO::WriteInt32(qbuf, 0);
-		memset(qbuf, 0, clen - 12);
+		std::memset(qbuf, 0, clen - 12);
 	}
 	NetServer::SendBufferToPlayer(players[1 - player], STOC_GAME_MSG, query_buffer, len + 4);
 	for (auto pit = observers.begin(); pit != observers.end(); ++pit)
