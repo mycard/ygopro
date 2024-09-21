@@ -54,7 +54,7 @@ void TagDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater) {
 		}
 		CTOS_JoinGame packet;
 		std::memcpy(&packet, pdata, sizeof packet);
-		const auto* pkt = &packet;
+		auto pkt = &packet;
 		if(pkt->version != PRO_VERSION) {
 			STOC_ErrorMsg scem;
 			scem.msg = ERRMSG_VERERROR;
@@ -64,6 +64,7 @@ void TagDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater) {
 			return;
 		}
 		wchar_t jpass[20];
+		BufferIO::NullTerminate(pkt->pass);
 		BufferIO::CopyWStr(pkt->pass, jpass, 20);
 #ifdef YGOPRO_SERVER_MODE
 		if(!wcscmp(jpass, L"the Big Brother") && !cache_recorder) {
@@ -388,7 +389,12 @@ void TagDuel::UpdateDeck(DuelPlayer* dp, unsigned char* pdata, int len) {
 		valid = false;
 	else if (sidec < 0 || sidec > SIDEC_MAX)
 		valid = false;
-	else if (deck_size != (mainc + sidec) * (int)sizeof(int32_t))
+	else if
+#ifdef YGOPRO_SERVER_MODE
+(deck_size < (mainc + sidec) * (int)sizeof(int32_t) || deck_size > MAINC_MAX + SIDEC_MAX)
+#else
+(deck_size != (mainc + sidec) * (int)sizeof(int32_t))
+#endif
 		valid = false;
 	if (!valid) {
 		STOC_ErrorMsg scem;
@@ -551,7 +557,7 @@ void TagDuel::TPResult(DuelPlayer* dp, unsigned char tp) {
 #endif
 	set_player_info(pduel, 0, host_info.start_lp, host_info.start_hand, host_info.draw_count);
 	set_player_info(pduel, 1, host_info.start_lp, host_info.start_hand, host_info.draw_count);
-	int opt = (int)host_info.duel_rule << 16;
+	unsigned int opt = (unsigned int)host_info.duel_rule << 16;
 	if(host_info.no_shuffle_deck)
 		opt |= DUEL_PSEUDO_SHUFFLE;
 	opt |= DUEL_TAG_MODE;
@@ -1883,7 +1889,7 @@ int TagDuel::Analyze(unsigned char* msgbuffer, unsigned int len) {
 	return 0;
 }
 void TagDuel::GetResponse(DuelPlayer* dp, unsigned char* pdata, unsigned int len) {
-	byte resb[SIZE_RETURN_VALUE];
+	byte resb[SIZE_RETURN_VALUE]{};
 	if (len > SIZE_RETURN_VALUE)
 		len = SIZE_RETURN_VALUE;
 	std::memcpy(resb, pdata, len);
@@ -2074,7 +2080,7 @@ if(!dp || dp == players[pid])
 			continue;
 		auto position = GetPosition(qbuf, 8);
 		if (position & POS_FACEDOWN)
-			memset(qbuf, 0, clen - 4);
+			std::memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
 	}
 	pid = 2 - pid;
@@ -2127,7 +2133,7 @@ if(!dp || dp == players[pid])
 			continue;
 		auto position = GetPosition(qbuf, 8);
 		if (position & POS_FACEDOWN)
-			memset(qbuf, 0, clen - 4);
+			std::memset(qbuf, 0, clen - 4);
 		qbuf += clen - 4;
 	}
 	pid = 2 - pid;
@@ -2175,7 +2181,7 @@ if(!dp || dp == cur_player[player])
 			continue;
 		auto position = GetPosition(qbuf, 8);
 		if(!(position & POS_FACEUP))
-			memset(qbuf, 0, slen - 4);
+			std::memset(qbuf, 0, slen - 4);
 		qbuf += slen - 4;
 	}
 	for(int i = 0; i < 4; ++i)

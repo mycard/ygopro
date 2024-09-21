@@ -1,7 +1,5 @@
-#ifndef __CONFIG_H
-#define __CONFIG_H
-
-#pragma once
+#ifndef YGOPRO_CONFIG_H
+#define YGOPRO_CONFIG_H
 
 #define _IRR_STATIC_LIB_
 #define IRR_COMPILE_WITH_DX9_DEV_PACK
@@ -31,7 +29,6 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
-#include <locale.h>
 
 #define SD_BOTH 2
 #define SOCKET int
@@ -42,46 +39,41 @@
 #define SOCKADDR sockaddr
 #define SOCKET_ERRNO() (errno)
 
-#include <wchar.h>
 #define mywcsncasecmp wcsncasecmp
 #define mystrncasecmp strncasecmp
-inline int _wtoi(const wchar_t * s) {
-	wchar_t * endptr;
-	return (int)wcstol(s, &endptr, 10);
-}
 #endif
 
+#include <wchar.h>
 template<size_t N, typename... TR>
 inline int myswprintf(wchar_t(&buf)[N], const wchar_t* fmt, TR... args) {
 	return swprintf(buf, N, fmt, args...);
 }
 
-#ifndef YGOPRO_SERVER_MODE
-#include <irrlicht.h>
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else //__APPLE__
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif //__APPLE__
-#include "CGUITTFont.h"
-#include "CGUIImageButton.h"
-#endif //YGOPRO_SERVER_MODE
-#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <thread>
-#include <mutex>
+#include <iostream>
 #include <algorithm>
+#include <string>
 #include "bufferio.h"
-#include "myfilesystem.h"
-#include "mysignal.h"
 #include "../ocgcore/ocgapi.h"
 #include "../ocgcore/common.h"
 
+inline FILE* myfopen(const char* filename, const char* mode) {
+	FILE* fp{};
+#ifdef _WIN32
+	wchar_t wname[256]{};
+	wchar_t wmode[20]{};
+	BufferIO::DecodeUTF8(filename, wname);
+	BufferIO::CopyWStr(mode, wmode, sizeof wmode / sizeof wmode[0]);
+	fp = _wfopen(wname, wmode);
+#else
+	fp = fopen(filename, mode);
+#endif
+	return fp;
+}
+
 #ifndef YGOPRO_SERVER_MODE
+#include <irrlicht.h>
 using namespace irr;
 using namespace core;
 using namespace scene;
