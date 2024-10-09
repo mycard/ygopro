@@ -16,31 +16,29 @@ namespace ygo {
 class DataManager {
 public:
 	DataManager();
+	bool ReadDB(sqlite3* pDB);
 	bool LoadDB(const wchar_t* wfile);
 	bool LoadStrings(const char* file);
 #ifndef YGOPRO_SERVER_MODE
 	bool LoadStrings(IReadFile* reader);
 #endif
 	void ReadStringConfLine(const char* linebuf);
-#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
-	bool Error(spmemvfs_db_t* pDB, sqlite3_stmt* pStmt = 0);
-#else
-	bool Error(sqlite3* pDB, sqlite3_stmt* pStmt = 0);
-#endif //YGOPRO_SERVER_MODE
-	bool GetData(unsigned int code, CardData* pData);
+	bool Error(sqlite3* pDB, sqlite3_stmt* pStmt = nullptr);
+
+	bool GetData(unsigned int code, CardData* pData) const;
 	code_pointer GetCodePointer(unsigned int code) const;
 	string_pointer GetStringPointer(unsigned int code) const;
-	bool GetString(unsigned int code, CardString* pStr);
-	const wchar_t* GetName(unsigned int code);
-	const wchar_t* GetText(unsigned int code);
-	const wchar_t* GetDesc(unsigned int strCode);
-	const wchar_t* GetSysString(int code);
-	const wchar_t* GetVictoryString(int code);
-	const wchar_t* GetCounterName(int code);
-	const wchar_t* GetSetName(int code);
-	std::vector<unsigned int> GetSetCodes(std::wstring setname);
+	bool GetString(unsigned int code, CardString* pStr) const;
+	const wchar_t* GetName(unsigned int code) const;
+	const wchar_t* GetText(unsigned int code) const;
+	const wchar_t* GetDesc(unsigned int strCode) const;
+	const wchar_t* GetSysString(int code) const;
+	const wchar_t* GetVictoryString(int code) const;
+	const wchar_t* GetCounterName(int code) const;
+	const wchar_t* GetSetName(int code) const;
+	std::vector<unsigned int> GetSetCodes(std::wstring setname) const;
 	const wchar_t* GetNumString(int num, bool bracket = false);
-	const wchar_t* FormatLocation(int location, int sequence);
+	const wchar_t* FormatLocation(int location, int sequence) const;
 	const wchar_t* FormatAttribute(int attribute);
 	const wchar_t* FormatRace(int race);
 	const wchar_t* FormatType(int type);
@@ -55,6 +53,7 @@ public:
 	code_pointer datas_end;
 	string_pointer strings_begin;
 	string_pointer strings_end;
+	char errmsg[512]{};
 
 	wchar_t numStrings[301][4]{};
 	wchar_t numBuffer[6]{};
