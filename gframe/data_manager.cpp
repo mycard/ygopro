@@ -201,7 +201,6 @@ bool DataManager::Error(sqlite3* pDB, sqlite3_stmt* pStmt) {
 		sqlite3_finalize(pStmt);
 	return false;
 }
-#endif //YGOPRO_SERVER_MODE
 bool DataManager::GetData(unsigned int code, CardData* pData) const {
 	auto cdit = _datas.find(code);
 	if(cdit == _datas.end())
