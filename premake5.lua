@@ -59,6 +59,7 @@ newoption { trigger = "winxp-support", category = "YGOPro", description = "" }
 newoption { trigger = "mac-arm", category = "YGOPro", description = "Cross compile for Apple Silicon" }
 
 newoption { trigger = "server-mode", category = "YGOPro - server", description = "" }
+newoption { trigger = "alpine-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-zip-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-pro2-support", category = "YGOPro - server", description = "" }
 newoption { trigger = "server-tag-surrender-confirm", category = "YGOPro - server", description = "" }
@@ -252,7 +253,10 @@ end
 
     filter "system:linux"
         buildoptions { "-U_FORTIFY_SOURCE" }
-
+        if GetParam("alpine-support") then
+            linkoptions { "`-Wl,-z,stack-size=1048576`" } 
+        end
+        
     filter "configurations:Release"
         optimize "Speed"
         targetdir "bin/release"
