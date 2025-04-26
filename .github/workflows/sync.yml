@@ -1,0 +1,71 @@
+# 工作流名称
+name: 同步上游 mycard/ygopro 的 server 分支
+
+# 赋予 workflow 写入仓库内容的权限
+permissions:
+  contents: write
+
+# 触发工作流的事件
+on:
+  schedule:
+    # 每天 UTC 时间 0 点运行一次
+    - cron: "0 0 * * *"
+  # 允许在 Actions 标签页手动触发此工作流
+  workflow_dispatch:
+
+jobs:
+  # 任务定义
+  sync_latest_from_upstream:
+    # 任务名称
+    name: 从 mycard/ygopro 同步 'server' 分支的最新提交
+    # 在最新的 Ubuntu runner 上运行
+    runs-on: ubuntu-latest
+    # 重要：仅当仓库是 fork 时才运行此工作流
+    if: ${{ github.event.repository.fork }}
+
+    steps:
+      # 步骤 1: 检出你的 fork 仓库的代码
+      - name: 检出目标仓库 (你的 fork)
+        uses: actions/checkout@v4 # 使用最新主版本 v4
+        with:
+          # 需要获取完整历史记录，以便在没有不相关历史错误的情况下进行合并
+          fetch-depth: 0
+          # 明确指定要检出的分支，确保我们操作的是目标分支
+          ref: server
+
+      # 步骤 2: 使用 action 将上游仓库的分支同步到你的 fork 仓库的分支
+      - name: 同步上游更改
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+        with:
+          # 要从中同步的上游仓库
+          upstream_sync_repo: mycard/ygopro
+          # 要从中同步的上游仓库分支
+          upstream_sync_branch: server
+          # 要同步到的目标仓库（你的 fork）分支
+          target_sync_branch: server
+          # 使用具有写入权限的默认 GITHUB_TOKEN
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+          # 将 test_mode 设置为 true 以运行测试而不是实际操作！设置为 false 进行实际同步。
+          test_mode: false
+
+      # 步骤 3: 处理潜在的同步失败
+      - name: 处理同步失败
+        # 仅当上一步 'sync' 失败时运行此步骤
+        if: failure()
+        run: |
+          echo "::error::同步上游仓库失败。"
+          echo "请检查工作流日志获取具体错误信息。"
+          echo "常见原因包括您的 'server' 分支与上游 'server' 分支之间存在合并冲突，或者潜在的权限问题。"
+          echo "您可能需要在您的 fork 仓库中手动解决冲突，然后再尝试同步。"
+          exit 1 # 确保工作流运行被标记为失败
+
+      # 可选：如果需要，输出同步结果（通常除非调试，否则不需要）
+      # - name: 同步结果
+      #   if: success() && steps.sync.outputs.has_new_commits == 'true'
+      #   run: echo "已成功从上游 mycard/ygopro (server 分支) 同步了新的提交。"
+      #
+      # - name: 没有新的提交
+      #   if: success() && steps.sync.outputs.has_new_commits == 'false'
+      #   run: echo "在上游 mycard/ygopro (server 分支) 上未发现新提交。您的 fork 已是最新。"
