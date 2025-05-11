@@ -225,7 +225,7 @@ exec_macos:
     #- dylibbundler -x ygopro.app/Contents/MacOS/ygopro -b -d ygopro.app/Contents/Frameworks/ -p @executable_path/../Frameworks/ -cd -i @executable_path/../Frameworks;
     #- strip ygopro.app/Contents/MacOS/ygopro;
     - mkdir ygopro.app/Contents/Resources;
-    - mv premake/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
+    - mv resource/gframe/ygopro.icns ygopro.app/Contents/Resources/Icon.icns;
     - defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIconFile" "Icon.icns";
     - defaults write "$PWD/ygopro.app/Contents/Info.plist" "CFBundleIdentifier" "moe.mycard.ygopro";
 
