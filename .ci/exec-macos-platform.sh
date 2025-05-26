@@ -18,6 +18,8 @@ export OGG_LIB_DIR=$PWD/miniaudio/external-built/lib
 ./.ci/libevent-prebuild.sh
 ./.ci/build-opus.sh
 
+rm -rf sqlite3/VERSION
+
 ./premake5 gmake --cc=clang --build-freetype --build-sqlite
 
 cd build

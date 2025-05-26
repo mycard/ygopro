@@ -15,14 +15,14 @@ mat_common:
     - linux
   script:
     # lua
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/lua-5.4.4.tar.gz | tar zfx -
-    - mv lua-5.4.4 lua
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/lua-5.4.7.tar.gz | tar zfx -
+    - mv lua-5.4.7 lua
     # sqlite3
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/sqlite-autoconf-3390300.tar.gz | tar zfx -
-    - mv sqlite-autoconf-3390300 sqlite3
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/sqlite-autoconf-3490100.tar.gz | tar zfx -
+    - mv sqlite-autoconf-3490100 sqlite3
     # freetype
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.11.1.tar.gz | tar zfx -
-    - mv freetype-2.11.1 freetype
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.13.3.tar.gz | tar zfx -
+    - mv freetype-2.13.3 freetype
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
     # miniaudio
@@ -58,7 +58,7 @@ mat_submodules:
 #  script:
 #    - apt update; apt -y install git wget tar
 #    - ./.ci/prepare-irrlicht.sh
-#    # - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta5-linux.tar.gz | tar zfx -
+#    # - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta6-linux.tar.gz | tar zfx -
 #    # - env PROCESSOR_COUNT=$(nproc) ./.ci/libevent-prebuild.sh
 #  artifacts:
 #    paths:
@@ -73,7 +73,7 @@ mat_macos:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta5-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta6-macosx.tar.gz | tar zfx -
     - chmod +x premake5
   artifacts:
     paths:
@@ -86,11 +86,11 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta5-windows.zip
-    - 7z x -y premake-5.0.0-beta5-windows.zip
+    - wget https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta6-windows.zip
+    - 7z x -y premake-5.0.0-beta6-windows.zip
     # event
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.0.22-stable.tar.gz | tar zfx -
-    - mv libevent-2.0.22-stable event
+    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.1.12-stable.tar.gz | tar zfx -
+    - mv libevent-2.1.12-stable event
   artifacts:
     paths:
       - premake5.exe
