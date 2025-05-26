@@ -110,9 +110,11 @@ exec_windows:
     - '.\premake5.exe vs2019'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
     - copy bin\release\x64\ygopro.exe .
+    - copy C:\Windows\System32\vcomp140.dll .
   artifacts:
     paths:
       - ygopro.exe
+      - vcomp140.dll
 
 .exec_unix:
   extends: ._exec_build
