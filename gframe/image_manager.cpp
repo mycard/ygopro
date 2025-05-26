@@ -1,6 +1,10 @@
 #include "image_manager.h"
 #include "game.h"
+<<<<<<< HEAD
 #ifdef YGOPRO_USE_THUMB_LOAD_THERAD
+=======
+#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
+>>>>>>> 47859b49df470c09130a8ed4cb9922ab8036c538
 #include <thread>
 #endif
 #ifdef _OPENMP
@@ -22,7 +26,11 @@ bool ImageManager::Initial() {
 	tUnknownFit = nullptr;
 	tUnknownThumb = nullptr;
 	tBigPicture = nullptr;
+<<<<<<< HEAD
 #ifdef YGOPRO_USE_THUMB_LOAD_THERAD
+=======
+#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
+>>>>>>> 47859b49df470c09130a8ed4cb9922ab8036c538
 	tLoading = nullptr;
 	tThumbLoadingThreadRunning = false;
 #endif
@@ -66,7 +74,11 @@ void ImageManager::ClearTexture() {
 			driver->removeTexture(tit->second);
 	}
 	for(auto tit = tThumb.begin(); tit != tThumb.end(); ++tit) {
+<<<<<<< HEAD
 #ifdef YGOPRO_USE_THUMB_LOAD_THERAD
+=======
+#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
+>>>>>>> 47859b49df470c09130a8ed4cb9922ab8036c538
 		if(tit->second && tit->second != tLoading)
 #else
 		if(tit->second)
@@ -80,7 +92,11 @@ void ImageManager::ClearTexture() {
 	tMap[0].clear();
 	tMap[1].clear();
 	tThumb.clear();
+<<<<<<< HEAD
 #ifdef YGOPRO_USE_THUMB_LOAD_THERAD
+=======
+#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
+>>>>>>> 47859b49df470c09130a8ed4cb9922ab8036c538
 	tThumbLoadingMutex.lock();
 	tThumbLoading.clear();
 	while(!tThumbLoadingCodes.empty())
@@ -123,7 +139,11 @@ void ImageManager::ResizeTexture() {
 	driver->removeTexture(tUnknown);
 	driver->removeTexture(tUnknownFit);
 	driver->removeTexture(tUnknownThumb);
+<<<<<<< HEAD
 #ifdef YGOPRO_USE_THUMB_LOAD_THERAD
+=======
+#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
+>>>>>>> 47859b49df470c09130a8ed4cb9922ab8036c538
 	driver->removeTexture(tLoading);
 	tLoading = GetTextureFromFile("textures/cover.jpg", imgWidthThumb, imgHeightThumb);
 #endif
@@ -298,7 +318,11 @@ irr::video::ITexture* ImageManager::GetBigPicture(int code, float zoom) {
 	tBigPicture = texture;
 	return texture;
 }
+<<<<<<< HEAD
 #ifdef YGOPRO_USE_THUMB_LOAD_THERAD
+=======
+#ifdef YGOPRO_USE_THUMB_LOAD_THREAD
+>>>>>>> 47859b49df470c09130a8ed4cb9922ab8036c538
 int ImageManager::LoadThumbThread() {
 	while(true) {
 		imageManager.tThumbLoadingMutex.lock();
@@ -354,11 +378,19 @@ int ImageManager::LoadThumbThread() {
 	imageManager.tThumbLoadingMutex.unlock();
 	return 0;
 }
+<<<<<<< HEAD
 #endif // YGOPRO_USE_THUMB_LOAD_THERAD
 irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 	if(code == 0)
 		return tUnknownThumb;
 #ifndef YGOPRO_USE_THUMB_LOAD_THERAD
+=======
+#endif // YGOPRO_USE_THUMB_LOAD_THREAD
+irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
+	if(code == 0)
+		return tUnknownThumb;
+#ifndef YGOPRO_USE_THUMB_LOAD_THREAD
+>>>>>>> 47859b49df470c09130a8ed4cb9922ab8036c538
 	auto tit = tThumb.find(code);
 	if(tit == tThumb.end()) {
 		char file[256];
@@ -381,7 +413,11 @@ irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 		tThumb[code] = img;
 		return (img == NULL) ? tUnknownThumb : img;
 	}
+<<<<<<< HEAD
 #else // YGOPRO_USE_THUMB_LOAD_THERAD
+=======
+#else // YGOPRO_USE_THUMB_LOAD_THREAD
+>>>>>>> 47859b49df470c09130a8ed4cb9922ab8036c538
 	imageManager.tThumbLoadingMutex.lock();
 	auto lit = tThumbLoading.find(code);
 	if(lit != tThumbLoading.end()) {
@@ -409,7 +445,11 @@ irr::video::ITexture* ImageManager::GetTextureThumb(int code) {
 		imageManager.tThumbLoadingMutex.unlock();
 		return tLoading;
 	}
+<<<<<<< HEAD
 #endif // YGOPRO_USE_THUMB_LOAD_THERAD
+=======
+#endif // YGOPRO_USE_THUMB_LOAD_THREAD
+>>>>>>> 47859b49df470c09130a8ed4cb9922ab8036c538
 	if(tit->second)
 		return tit->second;
 	else
