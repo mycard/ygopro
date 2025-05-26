@@ -118,12 +118,12 @@ project "miniaudio"
                 "external/vorbis/include",
             }
             defines {
-                "OPUS_BUILD", "USE_ALLOCA",
+                "OPUS_BUILD", "USE_ALLOCA", "HAVE_LRINTF", "OP_HAVE_LRINTF",
                 "OPUS_X86_PRESUME_SSE", "OPUS_X86_PRESUME_SSE2",
                 "OPUS_HAVE_RTCD", "OPUS_X86_MAY_HAVE_SSE", "OPUS_X86_MAY_HAVE_SSE4_1", "OPUS_X86_MAY_HAVE_AVX2",
             }
         else
-            includedirs { OPUS_INCLUDE_DIR, VORBIS_INCLUDE_DIR, OGG_INCLUDE_DIR }
+            includedirs { OPUS_INCLUDE_DIR, OPUSFILE_INCLUDE_DIR, VORBIS_INCLUDE_DIR, OGG_INCLUDE_DIR }
         end
     end
 

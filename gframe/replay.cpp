@@ -138,6 +138,8 @@ bool Replay::OpenReplay(const wchar_t* name) {
 		Reset();
 		return false;
 	}
+	info_offset = data_position;
+	data_position = 0;
 	return true;
 }
 bool Replay::CheckReplay(const wchar_t* name) {
@@ -218,10 +220,14 @@ void Replay::Reset() {
 	replay_size = 0;
 	comp_size = 0;
 	data_position = 0;
+	info_offset = 0;
 	players.clear();
 	params = { 0 };
 	decks.clear();
 	script_name.clear();
+}
+void Replay::SkipInfo(){
+	data_position += info_offset;
 }
 bool Replay::ReadInfo() {
 	int player_count = (pheader.flag & REPLAY_TAG) ? 4 : 2;
@@ -245,11 +251,15 @@ bool Replay::ReadInfo() {
 		if (!ReadData(filename, slen))
 			return false;
 		filename[slen] = 0;
-		script_name = filename;
+		if (std::strncmp(filename, "./single/", 9))
+			return false;
+		script_name = filename + 9;
+		if (script_name.find_first_of(R"(/\)") != std::string::npos)
+			return false;
 	}
 	else {
 		for (int p = 0; p < player_count; ++p) {
-			ReplayDeck deck;
+			DeckArray deck;
 			uint32_t main = Read<uint32_t>();
 			if (main > MAINC_MAX)
 				return false;

@@ -132,6 +132,8 @@ exec_linux:
     EVENT_LIB_DIR: /usr/share/libevent-stable/lib
     OPUS_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include/opus
     OPUS_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
+    OPUSFILE_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include/opus
+    OPUSFILE_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
     VORBIS_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include
     VORBIS_LIB_DIR: $CI_PROJECT_DIR/miniaudio/external-built/lib
     OGG_INCLUDE_DIR: $CI_PROJECT_DIR/miniaudio/external-built/include
@@ -227,12 +229,8 @@ assets:
     - wget -O - https://code.moenext.com/mycard/ygopro-sounds/-/archive/master/ygopro-sounds-master.tar.gz | tar zfx -
     - mv ygopro-sounds-master/sound/* sound
     # fonts
-    - mkdir fonts
-    - cd fonts
-    - wget -O - https://cdn02.moecube.com:444/ygopro-fonts.tar.gz | tar zfx -
-    - mv simhei.ttf textFont.ttf
-    - mv arial.ttf numFont.ttf
-    - cd ..
+    - git clone --depth=1 https://code.moenext.com/mycard/ygopro-fonts
+    - mv ygopro-fonts/fonts .
     # pack
     - git clone --depth=1 https://code.moenext.com/mycard/ygopro-card-list
     - mv ygopro-card-list/pack .

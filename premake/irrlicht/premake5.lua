@@ -16,6 +16,7 @@ project "irrlicht"
         "_IRR_STATIC_LIB_",
         "NO_IRR_USE_NON_SYSTEM_BZLIB_",
         "NO_IRR_COMPILE_WITH_BZIP2_",
+        "NO_IRR_COMPILE_WITH_LZMA_",
         "NO_IRR_COMPILE_WITH_CONSOLE_DEVICE_",
         "NO_IRR_COMPILE_WITH_DIRECT3D_8_",
         "NO_IRR_COMPILE_WITH_DIRECTINPUT_JOYSTICK_",
@@ -62,13 +63,13 @@ project "irrlicht"
         "NO__IRR_COMPILE_WITH_WAD_ARCHIVE_LOADER_",
         "NO_IRR_COMPILE_WITH_ZIP_ENCRYPTION_",
         "PNG_INTEL_SSE",
+        "PNG_ARM_NEON_OPT=0",
+        "PNG_ARM_NEON_IMPLEMENTATION=0",
     }
 
     files {
         "include/*.h",
         "source/Irrlicht/*.cpp",
-        "source/Irrlicht/lzma/*.h",
-        "source/Irrlicht/lzma/*.c",
         "source/Irrlicht/zlib/zlib.h",
         "source/Irrlicht/zlib/adler32.c",
         "source/Irrlicht/zlib/compress.c",
@@ -161,7 +162,7 @@ project "irrlicht"
 
     filter { "system:macosx" }
         cppdialect "gnu++14"
-        defines { "GL_SILENCE_DEPRECATION", "PNG_ARM_NEON_OPT=0", "PNG_ARM_NEON_IMPLEMENTATION=0" }
+        defines { "GL_SILENCE_DEPRECATION" }
         undefines { "NO_IRR_COMPILE_WITH_JOYSTICK_EVENTS_" }
         files {
             "source/Irrlicht/MacOSX/*.mm",

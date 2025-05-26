@@ -33,7 +33,9 @@ runForDepot() {
   echo "$result" | jq .
 }
 
-if [[ "$CI_COMMIT_TAG" == *".pre"* ]]; then
+source .ci/asset-branch
+
+if [[ "$ASSET_BRANCH_NAME" == "develop" ]]; then
   echo "This is a pre-release, skipping upload."
 else
   runForDepot win32 zh-CN

@@ -299,24 +299,24 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				auto selected = mainGame->lstReplayList->getSelected();
 				if(selected == -1)
 					break;
-				Replay replay1;
-				wchar_t replay_name[256]{};
+				Replay replay;
+				wchar_t replay_filename[256]{};
 				wchar_t namebuf[4][20]{};
 				wchar_t filename[256]{};
 				wchar_t replay_path[256]{};
-				BufferIO::CopyWideString(mainGame->lstReplayList->getListItem(selected), replay_name);
-				myswprintf(replay_path, L"./replay/%ls", replay_name);
-				if (!replay1.OpenReplay(replay_path))
+				BufferIO::CopyWideString(mainGame->lstReplayList->getListItem(selected), replay_filename);
+				myswprintf(replay_path, L"./replay/%ls", replay_filename);
+				if (!replay.OpenReplay(replay_path))
 					break;
-				if (replay1.pheader.flag & REPLAY_SINGLE_MODE)
+				if (replay.pheader.flag & REPLAY_SINGLE_MODE)
 					break;
-				for (size_t i = 0; i < replay1.decks.size(); ++i) {
-					BufferIO::CopyWideString(replay1.players[Replay::GetDeckPlayer(i)].c_str(), namebuf[i]);
+				for (size_t i = 0; i < replay.decks.size(); ++i) {
+					BufferIO::CopyWideString(replay.players[Replay::GetDeckPlayer(i)].c_str(), namebuf[i]);
 					FileSystem::SafeFileName(namebuf[i]);
 				}
-				for (size_t i = 0; i < replay1.decks.size(); ++i) {
-					myswprintf(filename, L"./deck/%ls-%d %ls.ydk", replay_name, i + 1, namebuf[i]);
-					DeckManager::SaveDeckBuffer(replay1.decks[i], filename);
+				for (size_t i = 0; i < replay.decks.size(); ++i) {
+					myswprintf(filename, L"./deck/%ls-%d %ls.ydk", replay_filename, i + 1, namebuf[i]);
+					DeckManager::SaveDeckArray(replay.decks[i], filename);
 				}
 				mainGame->stACMessage->setText(dataManager.GetSysString(1335));
 				mainGame->PopupElement(mainGame->wACMessage, 20);
@@ -545,11 +545,11 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					repinfo.append(path);
 					repinfo.append(L"\n");
 				}
-				const auto& namebuf = ReplayMode::cur_replay.players;
+				const auto& player_names = ReplayMode::cur_replay.players;
 				if(ReplayMode::cur_replay.pheader.flag & REPLAY_TAG)
-					myswprintf(infobuf, L"%ls\n%ls\n===VS===\n%ls\n%ls\n", namebuf[0].c_str(), namebuf[1].c_str(), namebuf[2].c_str(), namebuf[3].c_str());
+					myswprintf(infobuf, L"%ls\n%ls\n===VS===\n%ls\n%ls\n", player_names[0].c_str(), player_names[1].c_str(), player_names[2].c_str(), player_names[3].c_str());
 				else
-					myswprintf(infobuf, L"%ls\n===VS===\n%ls\n", namebuf[0].c_str(), namebuf[1].c_str());
+					myswprintf(infobuf, L"%ls\n===VS===\n%ls\n", player_names[0].c_str(), player_names[1].c_str());
 				repinfo.append(infobuf);
 				mainGame->ebRepStartTurn->setText(L"1");
 				mainGame->SetStaticText(mainGame->stReplayInfo, 180, mainGame->guiFont, repinfo.c_str());

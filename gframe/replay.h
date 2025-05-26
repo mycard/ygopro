@@ -80,6 +80,7 @@ public:
 	int32_t ReadInt32();
 	void Rewind();
 	void Reset();
+	void SkipInfo();
 
 	FILE* fp{ nullptr };
 #ifdef _WIN32
@@ -93,7 +94,7 @@ public:
 	std::vector<std::wstring> players;	// 80 or 160 bytes
 	DuelParameters params;				// 16 bytes
 
-	std::vector<ReplayDeck> decks;		// 4 bytes, main deck, 4 bytes, extra deck
+	std::vector<DeckArray> decks;		// 4 bytes, main deck, 4 bytes, extra deck
 	std::string script_name;			// 2 bytes, script name (max: 256 bytes)
 
 private:
@@ -102,6 +103,7 @@ private:
 	unsigned char* replay_data;
 	size_t replay_size{};
 	size_t data_position{};
+	size_t info_offset{};
 	bool is_recording{};
 	bool is_replaying{};
 	bool can_read{};
