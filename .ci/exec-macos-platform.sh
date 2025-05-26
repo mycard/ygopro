@@ -23,7 +23,7 @@ rm -rf sqlite3/VERSION
 ./premake5 gmake --cc=clang --build-freetype --build-sqlite
 
 cd build
-make config=release -j$(nproc)
+make config=release -j$(sysctl -n hw.ncpu)
 cd ..
 
 mkdir ygopro-platforms
