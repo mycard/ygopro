@@ -15,16 +15,16 @@ mat_common:
     - linux
   script:
     # lua
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/lua-5.4.7.tar.gz | tar zfx -
-    - mv lua-5.4.7 lua
+    - wget -O - https://mat-cacher.moenext.com/https://www.lua.org/ftp/lua-5.4.8.tar.gz | tar zfx -
+    - mv lua-5.4.8 lua
     # sqlite3
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/sqlite-autoconf-3490100.tar.gz | tar zfx -
-    - mv sqlite-autoconf-3490100 sqlite3
+    - wget -O - https://mat-cacher.moenext.com/https://www.sqlite.org/2025/sqlite-autoconf-3500100.tar.gz | tar zfx -
+    - mv sqlite-autoconf-3500100 sqlite3
     # freetype
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/freetype-2.13.3.tar.gz | tar zfx -
+    - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/freetype/freetype-2.13.3.tar.gz | tar zfx -
     - mv freetype-2.13.3 freetype
     # event
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/libevent-2.1.12-stable.tar.gz | tar zfx -
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz | tar zfx -
     - mv libevent-2.1.12-stable event
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
@@ -76,7 +76,7 @@ mat_macos:
   tags:
     - linux
   script:
-    - wget -O - https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta6-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-macosx.tar.gz | tar zfx -
     - chmod +x premake5
   artifacts:
     paths:
@@ -88,7 +88,7 @@ mat_windows:
     - linux
   script:
     # premake5.exe
-    - wget https://cdn02.moecube.com:444/ygopro-build-materials/premake-5.0.0-beta6-windows.zip
+    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-windows.zip
     - 7z x -y premake-5.0.0-beta6-windows.zip
   artifacts:
     paths:

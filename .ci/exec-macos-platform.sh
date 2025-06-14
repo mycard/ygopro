@@ -16,7 +16,7 @@ make config=release -j$(sysctl -n hw.ncpu)
 cd ..
 
 mkdir ygopro-platforms
-mv bin/release/YGOPro.app $TARGET_YGOPRO_BINARY_PATH
+mv bin/release/YGOPro $TARGET_YGOPRO_BINARY_PATH
 
 #if [[ $TARGET_PLATFORM == "x86" ]]; then
 #  install_name_tool -change /usr/local/lib/libirrklang.dylib @executable_path/../Frameworks/libirrklang.dylib $TARGET_YGOPRO_BINARY_PATH

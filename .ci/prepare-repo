@@ -1,0 +1,20 @@
+source .ci/asset-branch
+BRANCH_NAME="$ASSET_BRANCH_NAME"
+
+prepare_repo() {
+  REPO_URL="$1"
+  TARGET_DIR_NAME="$2"
+
+  if [ ! -d "$TARGET_DIR_NAME" ]; then
+    echo "Cloning repository $REPO_URL branch $BRANCH_NAME into $TARGET_DIR_NAME"
+    git clone --depth=1 --branch "$BRANCH_NAME" "$REPO_URL" "$TARGET_DIR_NAME"
+  else
+    echo "Repository $REPO_URL already exists in $TARGET_DIR_NAME, updating to $BRANCH_NAME..."
+    cd "$TARGET_DIR_NAME"
+    git remote set-url origin "$REPO_URL"
+    git fetch origin "$BRANCH_NAME"
+    git checkout "$BRANCH_NAME"
+    git reset --hard origin/"$BRANCH_NAME"
+    cd ..
+  fi
+}
