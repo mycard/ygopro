@@ -89,7 +89,7 @@ mat_windows:
   script:
     # premake5.exe
     - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-windows.zip
-    - 7z x -y premake-5.0.0-beta6-windows.zip
+    - 7z x -y premake-5.0.0-beta7-windows.zip
   artifacts:
     paths:
       - premake5.exe
