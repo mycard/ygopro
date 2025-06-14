@@ -10,8 +10,11 @@ BUILD_LUA = true
 LUA_LIB_NAME = "lua" -- change this if you don't build Lua
 
 BUILD_EVENT = os.istarget("windows")
+
 BUILD_FREETYPE = os.istarget("windows")
+
 BUILD_SQLITE = os.istarget("windows")
+
 BUILD_IRRLICHT = true -- modified Irrlicht is required, can't use the official one
 USE_DXSDK = true
 
@@ -290,7 +293,6 @@ workspace "YGOPro"
         if MAC_ARM and MAC_INTEL then
             architecture "universal"
         end
-        links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
 
     filter "system:linux"
         buildoptions { "-U_FORTIFY_SOURCE" }
@@ -326,7 +328,6 @@ workspace "YGOPro"
         disablewarnings { "4244", "4267", "4838", "4996", "6011", "6031", "6054", "6262" }
 
     filter { "configurations:Release", "not action:vs*" }
-        symbols "On"
         defines "NDEBUG"
 
     filter { "configurations:Debug", "action:vs*" }
