@@ -99,28 +99,28 @@ jobs:
       id: lua
       uses: mercury233/action-cache-download-file@v1.0.0
       with:
-        url: https://www.lua.org/ftp/lua-5.4.7.tar.gz
+        url: https://www.lua.org/ftp/lua-5.4.8.tar.gz
 
     - name: Extract lua
       run: |
         tar xf ${{ steps.lua.outputs.filepath }}
-        move lua-5.4.7 lua
+        move lua-5.4.8 lua
 
     - name: Download sqlite
       id: sqlite
       uses: mercury233/action-cache-download-file@v1.0.0
       with:
-        url: https://www.sqlite.org/2025/sqlite-amalgamation-3490100.zip
+        url: https://www.sqlite.org/2025/sqlite-amalgamation-3500100.zip
 
     - name: Extract sqlite
       run: |
         7z x ${{ steps.sqlite.outputs.filepath }}
-        move sqlite-amalgamation-3490100 sqlite3
+        move sqlite-amalgamation-3500100 sqlite3
 
     - name: Download miniaudio
       if: matrix.audiolib == 'miniaudio'
       run: |
-        git clone --depth=1 --branch 0.11.22 https://github.com/mackron/miniaudio
+        git clone --depth=1 https://github.com/mercury233/miniaudio
         cd miniaudio
         xcopy /Y extras\miniaudio_split\miniaudio.* .
         cd ..
@@ -345,29 +345,29 @@ jobs:
       id: lua
       uses: mercury233/action-cache-download-file@v1.0.0
       with:
-        url: https://www.lua.org/ftp/lua-5.4.7.tar.gz
+        url: https://www.lua.org/ftp/lua-5.4.8.tar.gz
 
     - name: Extract lua
       run: |
         tar xf ${{ steps.lua.outputs.filepath }}
-        mv lua-5.4.7 lua
+        mv lua-5.4.8 lua
 
     - name: Download sqlite
       if: matrix.static-link == true
       id: sqlite
       uses: mercury233/action-cache-download-file@v1.0.0
       with:
-        url: https://www.sqlite.org/2025/sqlite-amalgamation-3490100.zip
+        url: https://www.sqlite.org/2025/sqlite-amalgamation-3500100.zip
 
     - name: Extract sqlite
       if: matrix.static-link == true
       run: |
         7z x ${{ steps.sqlite.outputs.filepath }}
-        mv sqlite-amalgamation-3490100 sqlite3
+        mv sqlite-amalgamation-3500100 sqlite3
 
     - name: Download miniaudio
       run: |
-        git clone --depth=1 --branch 0.11.22 https://github.com/mackron/miniaudio
+        git clone --depth=1 https://github.com/mercury233/miniaudio
         cd miniaudio
         cp extras/miniaudio_split/miniaudio.* .
         cd ..
@@ -585,29 +585,29 @@ jobs:
       id: lua
       uses: mercury233/action-cache-download-file@v1.0.0
       with:
-        url: https://www.lua.org/ftp/lua-5.4.7.tar.gz
+        url: https://www.lua.org/ftp/lua-5.4.8.tar.gz
 
     - name: Extract lua
       run: |
         tar xf ${{ steps.lua.outputs.filepath }}
-        mv lua-5.4.7 lua
+        mv lua-5.4.8 lua
 
     - name: Download sqlite
       if: matrix.static-link == true
       id: sqlite
       uses: mercury233/action-cache-download-file@v1.0.0
       with:
-        url: https://www.sqlite.org/2025/sqlite-amalgamation-3490100.zip
+        url: https://www.sqlite.org/2025/sqlite-amalgamation-3500100.zip
 
     - name: Extract sqlite
       if: matrix.static-link == true
       run: |
         7z x ${{ steps.sqlite.outputs.filepath }}
-        mv sqlite-amalgamation-3490100 sqlite3
+        mv sqlite-amalgamation-3500100 sqlite3
 
     - name: Download miniaudio
       run: |
-        git clone --depth=1 --branch 0.11.22 https://github.com/mackron/miniaudio
+        git clone --depth=1 https://github.com/mercury233/miniaudio
         cd miniaudio
         cp extras/miniaudio_split/miniaudio.* .
         cd ..

@@ -1,6 +1,5 @@
 #include "event_handler.h"
 #include "client_field.h"
-#include "math.h"
 #include "network.h"
 #include "game.h"
 #include "duelclient.h"
@@ -11,7 +10,6 @@
 #include "replay_mode.h"
 #include "single_mode.h"
 #include "materials.h"
-#include "../ocgcore/common.h"
 
 namespace ygo {
 
@@ -377,9 +375,9 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					select_options_index.clear();
 					for (size_t i = 0; i < activatable_cards.size(); ++i) {
 						if (activatable_cards[i] == menu_card) {
-							if(activatable_descs[i].second == EDESC_OPERATION)
+							if(activatable_descs[i].second & EDESC_OPERATION)
 								continue;
-							else if(activatable_descs[i].second == EDESC_RESET) {
+							else if(activatable_descs[i].second & EDESC_RESET) {
 								if(id == BUTTON_CMD_ACTIVATE) continue;
 							} else {
 								if(id == BUTTON_CMD_RESET) continue;
@@ -660,7 +658,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						select_options_index.clear();
 						for (size_t i = 0; i < activatable_cards.size(); ++i) {
 							if (activatable_cards[i] == command_card) {
-								if(activatable_descs[i].second == EDESC_OPERATION) {
+								if(activatable_descs[i].second & EDESC_OPERATION) {
 									if(list_command == COMMAND_ACTIVATE) continue;
 								} else {
 									if(list_command == COMMAND_OPERATION) continue;
