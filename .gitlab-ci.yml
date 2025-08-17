@@ -96,6 +96,10 @@ mat_windows:
 
 ._exec_build:
   stage: build
+  before_script:
+    - cd ocgcore
+    - git clean -dfx
+    - cd ..
 
 exec_windows:
   extends: ._exec_build
