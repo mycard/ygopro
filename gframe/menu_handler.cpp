@@ -17,14 +17,14 @@ void UpdateDeck() {
 	BufferIO::CopyWideString(mainGame->cbDeckSelect->getText(), mainGame->gameConf.lastdeck);
 	unsigned char deckbuf[1024]{};
 	auto pdeck = deckbuf;
-	BufferIO::WriteInt32(pdeck, deckManager.current_deck.main.size() + deckManager.current_deck.extra.size());
-	BufferIO::WriteInt32(pdeck, deckManager.current_deck.side.size());
+	BufferIO::Write<int32_t>(pdeck, static_cast<int32_t>(deckManager.current_deck.main.size() + deckManager.current_deck.extra.size()));
+	BufferIO::Write<int32_t>(pdeck, static_cast<int32_t>(deckManager.current_deck.side.size()));
 	for(size_t i = 0; i < deckManager.current_deck.main.size(); ++i)
-		BufferIO::WriteInt32(pdeck, deckManager.current_deck.main[i]->first);
+		BufferIO::Write<uint32_t>(pdeck, deckManager.current_deck.main[i]->first);
 	for(size_t i = 0; i < deckManager.current_deck.extra.size(); ++i)
-		BufferIO::WriteInt32(pdeck, deckManager.current_deck.extra[i]->first);
+		BufferIO::Write<uint32_t>(pdeck, deckManager.current_deck.extra[i]->first);
 	for(size_t i = 0; i < deckManager.current_deck.side.size(); ++i)
-		BufferIO::WriteInt32(pdeck, deckManager.current_deck.side[i]->first);
+		BufferIO::Write<uint32_t>(pdeck, deckManager.current_deck.side[i]->first);
 	DuelClient::SendBufferToServer(CTOS_UPDATE_DECK, deckbuf, pdeck - deckbuf);
 }
 bool MenuHandler::OnEvent(const irr::SEvent& event) {
@@ -382,9 +382,9 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					int flag = 0;
 					flag += (mainGame->chkBotHand->isChecked() ? 0x1 : 0);
 					char arg2[8];
-					std::snprintf(arg2, sizeof arg2, "%d", flag);
+					mysnprintf(arg2, "%d", flag);
 					char arg3[8];
-					std::snprintf(arg3, sizeof arg3, "%d", mainGame->gameConf.serverport);
+					mysnprintf(arg3, "%d", mainGame->gameConf.serverport);
 					execl("./bot", "bot", arg1, arg2, arg3, nullptr);
 					std::exit(0);
 				} else {
@@ -428,8 +428,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					wchar_t *dot = std::wcsrchr(open_file_name, L'.');
 					if(dash && dot && !mywcsncasecmp(dot, L".ydk", 4)) { // full path
 						wchar_t deck_name[256];
-						std::wcsncpy(deck_name, dash + 1, dot - dash - 1);
-						deck_name[dot - dash - 1] = L'\0';
+						BufferIO::CopyWideString(dash + 1, deck_name, dot - dash - 1);
 						mainGame->ebDeckname->setText(deck_name);
 						mainGame->cbDBCategory->setSelected(-1);
 						mainGame->cbDBDecks->setSelected(-1);
@@ -438,7 +437,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 						mainGame->cbDBDecks->setEnabled(false);
 					} else if(dash) { // has category
 						wchar_t deck_name[256];
-						std::wcsncpy(deck_name, dash + 1, 256);
+						BufferIO::CopyWideString(dash + 1, deck_name);
 						for(size_t i = 0; i < mainGame->cbDBDecks->getItemCount(); ++i) {
 							if(!std::wcscmp(mainGame->cbDBDecks->getItem(i), deck_name)) {
 								BufferIO::CopyWideString(deck_name, mainGame->gameConf.lastdeck);

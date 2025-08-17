@@ -144,7 +144,7 @@ jobs:
       uses: mercury233/action-cache-download-file@v1.0.0
       with:
         url: https://github.com/xiph/opus/releases/download/v1.5.2/opus-1.5.2.tar.gz
-    
+
     - name: Extract opus
       if: matrix.audiolib == 'miniaudio'
       run: |
@@ -398,7 +398,7 @@ jobs:
       uses: mercury233/action-cache-download-file@v1.0.0
       with:
         url: https://github.com/xiph/opus/releases/download/v1.5.2/opus-1.5.2.tar.gz
-    
+
     - name: Extract opus
       if: matrix.static-link == true
       run: |
@@ -437,8 +437,8 @@ jobs:
 
     - name: Copy premake files
       run: |
-        cp -r premake/* .
-        cp -r resource/* .
+        cp -pr premake/* .
+        cp -pr resource/* .
 
     - name: Use premake to generate make files (apt packages)
       if: matrix.static-link != true
@@ -625,7 +625,7 @@ jobs:
       uses: mercury233/action-cache-download-file@v1.0.0
       with:
         url: https://github.com/xiph/opus/releases/download/v1.5.2/opus-1.5.2.tar.gz
-    
+
     - name: Extract opus
       if: matrix.static-link == true
       run: |
@@ -664,8 +664,8 @@ jobs:
 
     - name: Copy premake files
       run: |
-        cp -r premake/* .
-        cp -r resource/* .
+        cp -pr premake/* .
+        cp -pr resource/* .
 
     - name: Use premake to generate make files (Homebrew packages)
       if: matrix.static-link != true
@@ -679,7 +679,7 @@ jobs:
           --build-event \
           --build-freetype \
           --build-sqlite \
-          --build-opus-vorbis 
+          --build-opus-vorbis
 
     - name: Make
       run: |
