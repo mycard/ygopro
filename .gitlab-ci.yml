@@ -96,6 +96,8 @@ mat_windows:
 
 ._exec_build:
   stage: build
+  variables:
+    GIT_STRATEGY: 'clone'
 
 exec_windows:
   extends: ._exec_build
