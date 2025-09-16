@@ -76,7 +76,7 @@ bool Game::Initialize() {
 		ErrorLog("Failed to load textures!");
 		return false;
 	}
-	DataManager::FileSystem = device->getFileSystem();
+	dataManager.FileSystem = device->getFileSystem();
 	if(!dataManager.LoadDB(L"cards.cdb")) {
 		ErrorLog("Failed to load card database (cards.cdb)!");
 		return false;
@@ -610,16 +610,16 @@ bool Game::Initialize() {
 	wANAttribute = env->addWindow(irr::core::rect<irr::s32>(500, 200, 830, 285), false, dataManager.GetSysString(562));
 	wANAttribute->getCloseButton()->setVisible(false);
 	wANAttribute->setVisible(false);
-	for(int filter = 0x1, i = 0; i < 7; filter <<= 1, ++i)
+	for (int i = 0; i < ATTRIBUTES_COUNT; ++i)
 		chkAttribute[i] = env->addCheckBox(false, irr::core::rect<irr::s32>(10 + (i % 4) * 80, 25 + (i / 4) * 25, 90 + (i % 4) * 80, 50 + (i / 4) * 25),
-		                                   wANAttribute, CHECK_ATTRIBUTE, dataManager.FormatAttribute(filter).c_str());
+			wANAttribute, CHECK_ATTRIBUTE, dataManager.GetSysString(DataManager::STRING_ID_ATTRIBUTE + i));
 	//announce race
 	wANRace = env->addWindow(irr::core::rect<irr::s32>(480, 200, 850, 410), false, dataManager.GetSysString(563));
 	wANRace->getCloseButton()->setVisible(false);
 	wANRace->setVisible(false);
-	for(int filter = 0x1, i = 0; i < RACES_COUNT; filter <<= 1, ++i)
+	for (int i = 0; i < RACES_COUNT; ++i)
 		chkRace[i] = env->addCheckBox(false, irr::core::rect<irr::s32>(10 + (i % 4) * 90, 25 + (i / 4) * 25, 100 + (i % 4) * 90, 50 + (i / 4) * 25),
-		                              wANRace, CHECK_RACE, dataManager.FormatRace(filter).c_str());
+			wANRace, CHECK_RACE, dataManager.GetSysString(DataManager::STRING_ID_RACE + i));
 	//selection hint
 	stHintMsg = env->addStaticText(L"", irr::core::rect<irr::s32>(500, 60, 820, 90), true, false, 0, -1, false);
 	stHintMsg->setBackgroundColor(0xc0ffffff);
@@ -754,14 +754,14 @@ bool Game::Initialize() {
 	cbAttribute = env->addComboBox(irr::core::rect<irr::s32>(60, 20 + 50 / 6, 195, 40 + 50 / 6), wFilter, COMBOBOX_ATTRIBUTE);
 	cbAttribute->setMaxSelectionRows(10);
 	cbAttribute->addItem(dataManager.GetSysString(1310), 0);
-	for (int filter = 0; filter < ATTRIBUTES_COUNT; ++filter)
-		cbAttribute->addItem(dataManager.FormatAttribute(0x1U << filter).c_str(), 0x1U << filter);
+	for (int i = 0; i < ATTRIBUTES_COUNT; ++i)
+		cbAttribute->addItem(dataManager.GetSysString(DataManager::STRING_ID_ATTRIBUTE + i), 0x1U << i);
 	stRace = env->addStaticText(dataManager.GetSysString(1321), irr::core::rect<irr::s32>(10, 42 + 75 / 6, 70, 62 + 75 / 6), false, false, wFilter);
 	cbRace = env->addComboBox(irr::core::rect<irr::s32>(60, 40 + 75 / 6, 195, 60 + 75 / 6), wFilter, COMBOBOX_RACE);
 	cbRace->setMaxSelectionRows(10);
 	cbRace->addItem(dataManager.GetSysString(1310), 0);
-	for (int filter = 0; filter < RACES_COUNT; ++filter)
-		cbRace->addItem(dataManager.FormatRace(0x1U << filter).c_str(), 0x1U << filter);
+	for (int i = 0; i < RACES_COUNT; ++i)
+		cbRace->addItem(dataManager.GetSysString(DataManager::STRING_ID_RACE + i), 0x1U << i);
 	stAttack = env->addStaticText(dataManager.GetSysString(1322), irr::core::rect<irr::s32>(205, 22 + 50 / 6, 280, 42 + 50 / 6), false, false, wFilter);
 	ebAttack = env->addEditBox(L"", irr::core::rect<irr::s32>(260, 20 + 50 / 6, 340, 40 + 50 / 6), true, wFilter, EDITBOX_INPUTS);
 	ebAttack->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -1114,41 +1114,48 @@ void Game::InitStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, i
 	scrCardText->setPos(0);
 }
 std::wstring Game::SetStaticText(irr::gui::IGUIStaticText* pControl, irr::u32 cWidth, irr::gui::CGUITTFont* font, const wchar_t* text, irr::u32 pos) {
-	int pbuffer = 0;
+	size_t pbuffer = 0;
 	irr::u32 _width = 0, _height = 0;
 	wchar_t prev = 0;
-	wchar_t strBuffer[4096];
-	std::wstring ret;
+	wchar_t strBuffer[4096]{};
+	constexpr size_t buffer_len = sizeof strBuffer / sizeof strBuffer[0] - 1;
+	const size_t text_len = std::wcslen(text);
 
-	for(size_t i = 0; text[i] != 0 && i < std::wcslen(text); ++i) {
+	for(size_t i = 0; i < text_len ; ++i) {
+		if (pbuffer >= buffer_len)
+			break;
 		wchar_t c = text[i];
 		irr::u32 w = font->getCharDimension(c).Width + font->getKerningWidth(c, prev);
 		prev = c;
-		if(text[i] == L'\r') {
+		if (c == L'\r') {
 			continue;
-		} else if(text[i] == L'\n') {
+		}
+		if (c == L'\n') {
 			strBuffer[pbuffer++] = L'\n';
 			_width = 0;
 			_height++;
 			prev = 0;
-			if(_height == pos)
+			if (_height == pos)
 				pbuffer = 0;
 			continue;
-		} else if(_width > 0 && _width + w > cWidth) {
+		}
+		if (_width > 0 && _width + w > cWidth) {
 			strBuffer[pbuffer++] = L'\n';
 			_width = 0;
 			_height++;
 			prev = 0;
-			if(_height == pos)
+			if (_height == pos)
 				pbuffer = 0;
 		}
+		if (pbuffer >= buffer_len)
+			break;
 		_width += w;
 		strBuffer[pbuffer++] = c;
 	}
 	strBuffer[pbuffer] = 0;
-	if(pControl) pControl->setText(strBuffer);
-	ret.assign(strBuffer);
-	return ret;
+	if (pControl)
+		pControl->setText(strBuffer);
+	return std::wstring(strBuffer);
 }
 void Game::LoadExpansions() {
 	FileSystem::TraversalDir(L"./expansions", [](const wchar_t* name, bool isdir) {
@@ -1168,17 +1175,17 @@ void Game::LoadExpansions() {
 		}
 		if (IsExtension(name, L".zip") || IsExtension(name, L".ypk")) {
 #ifdef _WIN32
-			DataManager::FileSystem->addFileArchive(fpath, true, false, irr::io::EFAT_ZIP);
+			dataManager.FileSystem->addFileArchive(fpath, true, false, irr::io::EFAT_ZIP);
 #else
 			char upath[1024];
 			BufferIO::EncodeUTF8(fpath, upath);
-			DataManager::FileSystem->addFileArchive(upath, true, false, irr::io::EFAT_ZIP);
+			dataManager.FileSystem->addFileArchive(upath, true, false, irr::io::EFAT_ZIP);
 #endif
 			return;
 		}
 	});
-	for(irr::u32 i = 0; i < DataManager::FileSystem->getFileArchiveCount(); ++i) {
-		auto archive = DataManager::FileSystem->getFileArchive(i)->getFileList();
+	for(irr::u32 i = 0; i < dataManager.FileSystem->getFileArchiveCount(); ++i) {
+		auto archive = dataManager.FileSystem->getFileArchive(i)->getFileList();
 		for(irr::u32 j = 0; j < archive->getFileCount(); ++j) {
 #ifdef _WIN32
 			const wchar_t* fname = archive->getFullFileName(j).c_str();
@@ -1193,9 +1200,9 @@ void Game::LoadExpansions() {
 			}
 			if (IsExtension(fname, L".conf")) {
 #ifdef _WIN32
-				auto reader = DataManager::FileSystem->createAndOpenFile(fname);
+				auto reader = dataManager.FileSystem->createAndOpenFile(fname);
 #else
-				auto reader = DataManager::FileSystem->createAndOpenFile(uname);
+				auto reader = dataManager.FileSystem->createAndOpenFile(uname);
 #endif
 				dataManager.LoadStrings(reader);
 				continue;
@@ -1559,8 +1566,9 @@ void Game::ShowCardInfo(int code, bool resize) {
 	if(showingcode == code && !resize)
 		return;
 	wchar_t formatBuffer[256];
-	auto cit = dataManager.GetCodePointer(code);
-	bool is_valid = (cit != dataManager.datas_end());
+	auto& _datas = dataManager.GetDataTable();
+	auto cit = _datas.find(code);
+	bool is_valid = (cit != _datas.end());
 	imgCard->setImage(imageManager.GetTexture(code, true));
 	if (is_valid) {
 		auto& cd = cit->second;
@@ -1581,12 +1589,13 @@ void Game::ShowCardInfo(int code, bool resize) {
 	if (is_valid && !gameConf.hide_setname) {
 		auto& cd = cit->second;
 		auto target = cit;
-		if (cd.alias && dataManager.GetCodePointer(cd.alias) != dataManager.datas_end()) {
-			target = dataManager.GetCodePointer(cd.alias);
+		if (cd.alias && _datas.find(cd.alias) != _datas.end()) {
+			target = _datas.find(cd.alias);
 		}
 		if (target->second.setcode[0]) {
 			offset = 23;// *yScale;
-			myswprintf(formatBuffer, L"%ls%ls", dataManager.GetSysString(1329), dataManager.FormatSetName(target->second.setcode).c_str());
+			const auto& setname = dataManager.FormatSetName(target->second.setcode);
+			myswprintf(formatBuffer, L"%ls%ls", dataManager.GetSysString(1329), setname.c_str());
 			stSetName->setText(formatBuffer);
 		}
 		else
@@ -1597,7 +1606,10 @@ void Game::ShowCardInfo(int code, bool resize) {
 	}
 	if(is_valid && cit->second.type & TYPE_MONSTER) {
 		auto& cd = cit->second;
-		myswprintf(formatBuffer, L"[%ls] %ls/%ls", dataManager.FormatType(cd.type).c_str(), dataManager.FormatRace(cd.race).c_str(), dataManager.FormatAttribute(cd.attribute).c_str());
+		const auto& type = dataManager.FormatType(cd.type);
+		const auto& race = dataManager.FormatRace(cd.race);
+		const auto& attribute = dataManager.FormatAttribute(cd.attribute);
+		myswprintf(formatBuffer, L"[%ls] %ls/%ls", type.c_str(), race.c_str(), attribute.c_str());
 		stInfo->setText(formatBuffer);
 		int offset_info = 0;
 		irr::core::dimension2d<unsigned int> dtxt = guiFont->getDimension(formatBuffer);
@@ -1619,10 +1631,11 @@ void Game::ShowCardInfo(int code, bool resize) {
 				myswprintf(adBuffer, L"%d/%d", cd.attack, cd.defense);
 		} else {
 			form = L"LINK-";
+			const auto& link_marker = dataManager.FormatLinkMarker(cd.link_marker);
 			if(cd.attack < 0)
-				myswprintf(adBuffer, L"?/-   %ls", dataManager.FormatLinkMarker(cd.link_marker).c_str());
+				myswprintf(adBuffer, L"?/-   %ls", link_marker.c_str());
 			else
-				myswprintf(adBuffer, L"%d/-   %ls", cd.attack, dataManager.FormatLinkMarker(cd.link_marker).c_str());
+				myswprintf(adBuffer, L"%d/-   %ls", cd.attack, link_marker.c_str());
 		}
 		if(cd.type & TYPE_PENDULUM) {
 			myswprintf(scaleBuffer, L"   %d/%d", cd.lscale, cd.rscale);
@@ -1640,8 +1653,10 @@ void Game::ShowCardInfo(int code, bool resize) {
 		scrCardText->setRelativePosition(irr::core::rect<irr::s32>(287 * xScale - 20, (83 + offset_arrows) + offset, 287 * xScale, 324 * yScale));
 	}
 	else {
-		if (is_valid)
-			myswprintf(formatBuffer, L"[%ls]", dataManager.FormatType(cit->second.type).c_str());
+		if (is_valid) {
+			const auto& type = dataManager.FormatType(cit->second.type);
+			myswprintf(formatBuffer, L"[%ls]", type.c_str());
+		}
 		else
 			myswprintf(formatBuffer, L"[%ls]", dataManager.unknown_string);
 		stInfo->setText(formatBuffer);
