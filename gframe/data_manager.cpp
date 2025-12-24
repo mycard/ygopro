@@ -9,7 +9,7 @@ namespace ygo {
 unsigned char DataManager::scriptBuffer[0x100000] = {};
 DataManager dataManager;
 #ifdef YGOPRO_SERVER_MODE
-static const char SELECT_STMT[] = "SELECT * FROM datas";
+static const char SELECT_STMT[] = "SELECT datas.id, datas.ot, datas.alias, datas.setcode, datas.type, datas.atk, datas.def, datas.level, datas.race, datas.attribute, datas.category FROM datas";
 #else
 static const char SELECT_STMT[] = "SELECT datas.id, datas.ot, datas.alias, datas.setcode, datas.type, datas.atk, datas.def, datas.level, datas.race, datas.attribute, datas.category,"
 " texts.name, texts.desc, texts.str1, texts.str2, texts.str3, texts.str4, texts.str5, texts.str6, texts.str7, texts.str8,"
