@@ -12,6 +12,12 @@ extern unsigned short replay_mode;
 #endif
 SingleDuel::SingleDuel(bool is_match) {
 	match_mode = is_match;
+	// Default match settings in upstream are Bo3 (first to 2, max 3 duels).
+	// This fork enables Bo5 for match mode.
+	if(match_mode) {
+		match_max_duels = 5;
+		match_wins_required = 3;
+	}
 }
 SingleDuel::~SingleDuel() {
 }
@@ -675,12 +681,19 @@ void SingleDuel::DuelEndProc() {
 #endif
 	} else {
 		int winc[3] = {0, 0, 0};
+		// Count per-duel outcomes collected so far: 0 = p0 win, 1 = p1 win, 2 = draw.
 		for(int i = 0; i < duel_count; ++i)
 			winc[match_result[i]]++;
-		if(match_kill
-		        || (winc[0] == 2 || (winc[0] == 1 && winc[2] == 2))
-		        || (winc[1] == 2 || (winc[1] == 1 && winc[2] == 2))
-		        || (winc[2] == 3 || (winc[0] == 1 && winc[1] == 1 && winc[2] == 1)) ) {
+
+		const int wins_to_win = match_wins_required > 0 ? match_wins_required : 2;
+		const int max_duels = match_max_duels > 0 ? match_max_duels : 3;
+		const bool match_finished =
+			match_kill
+			|| (winc[0] >= wins_to_win)
+			|| (winc[1] >= wins_to_win)
+			|| (duel_count >= max_duels);
+
+		if(match_finished) {
 			NetServer::SendPacketToPlayer(players[0], STOC_DUEL_END);
 			NetServer::ReSendToPlayer(players[1]);
 			for(auto oit = observers.begin(); oit != observers.end(); ++oit)

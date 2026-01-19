@@ -75,10 +75,16 @@ protected:
 #endif
 	Replay last_replay;
 	bool match_mode{ false };
+	// Set by ocgcore (MSG_MATCH_KILL). Non-zero means the match must end after the current duel.
 	int match_kill{ 0 };
+	// Match configuration (server-side). Defaults to Bo3 unless changed by constructor.
+	unsigned char match_max_duels{ 3 };
+	unsigned char match_wins_required{ 2 };
 	unsigned char duel_count{ 0 };
 	unsigned char tp_player{ 0 };
-	unsigned char match_result[3]{};
+	// Per-duel outcomes: 0 = p0 win, 1 = p1 win, 2 = draw.
+	// For Bo5 we need up to 5 results.
+	unsigned char match_result[5]{};
 	short time_limit[2]{};
 	short time_elapsed{ 0 };
 #ifdef YGOPRO_SERVER_MODE
