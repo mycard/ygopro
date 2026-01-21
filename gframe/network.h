@@ -338,6 +338,8 @@ public:
 #define MODE_SINGLE		0x0
 #define MODE_MATCH		0x1
 #define MODE_TAG		0x2
+#define MODE_MATCH_BO5  0x3
+#define MODE_MATCH_BO7 0x4
 
 #define DUEL_STAGE_BEGIN		0
 #define DUEL_STAGE_FINGER		1

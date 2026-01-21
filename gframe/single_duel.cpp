@@ -4,6 +4,7 @@
 #include "game.h"
 #include "data_manager.h"
 #include "../ocgcore/mtrandom.h"
+#include <cstring>
 
 namespace ygo {
 
@@ -12,15 +13,24 @@ extern unsigned short replay_mode;
 #endif
 SingleDuel::SingleDuel(bool is_match) {
 	match_mode = is_match;
-	// Default match settings in upstream are Bo3 (first to 2, max 3 duels).
-	// This fork enables Bo5 for match mode.
-	if(match_mode) {
-		match_max_duels = 5;
-		match_wins_required = 3;
-	}
 }
 SingleDuel::~SingleDuel() {
 }
+
+void SingleDuel::SetMatchBestOf(int best_of) {
+	if(best_of < 1) best_of = 1;
+	if(best_of > 99) best_of = 99;
+	if(best_of > 1 && (best_of % 2) == 0) best_of += 1; // fuerza impar
+
+	match_mode = true;
+	match_max_duels = static_cast<unsigned char>(best_of);
+	match_wins_required = static_cast<unsigned char>(best_of / 2 + 1);
+
+	// importante: reset del match
+	duel_count = 0;
+	std::memset(match_result, 2, sizeof(match_result)); // 2 = draw (valor neutro)
+}
+
 void SingleDuel::Chat(DuelPlayer* dp, unsigned char* pdata, int len) {
 	unsigned char scc[SIZE_STOC_CHAT];
 	const auto scc_size = NetServer::CreateChatPacket(pdata, len, scc, dp->type);
@@ -680,18 +690,20 @@ void SingleDuel::DuelEndProc() {
 		duel_stage = DUEL_STAGE_END;
 #endif
 	} else {
-		int winc[3] = {0, 0, 0};
-		// Count per-duel outcomes collected so far: 0 = p0 win, 1 = p1 win, 2 = draw.
-		for(int i = 0; i < duel_count; ++i)
-			winc[match_result[i]]++;
+		int winc[3] = {0, 0, 0}; // 0=p0, 1=p1, 2=draw
 
-		const int wins_to_win = match_wins_required > 0 ? match_wins_required : 2;
-		const int max_duels = match_max_duels > 0 ? match_max_duels : 3;
+		// cuenta solo lo que cabe dentro del best-of actual
+		const int limit = (duel_count < match_max_duels) ? duel_count : match_max_duels;
+		for(int i = 0; i < limit; ++i) {
+			const unsigned char r = match_result[i];
+			if(r <= 2) winc[r]++;
+		}
+
 		const bool match_finished =
 			match_kill
-			|| (winc[0] >= wins_to_win)
-			|| (winc[1] >= wins_to_win)
-			|| (duel_count >= max_duels);
+			|| (winc[0] >= match_wins_required)
+			|| (winc[1] >= match_wins_required)
+			|| (duel_count >= match_max_duels);
 
 		if(match_finished) {
 			NetServer::SendPacketToPlayer(players[0], STOC_DUEL_END);
@@ -747,13 +759,21 @@ void SingleDuel::Surrender(DuelPlayer* dp) {
 #ifdef YGOPRO_SERVER_MODE
 	NetServer::ReSendToPlayers(cache_recorder, replay_recorder);
 #endif
+	unsigned char res;
 	if(players[player] == pplayer[player]) {
-		match_result[duel_count++] = 1 - player;
+		res = 1 - player;
 		tp_player = player;
 	} else {
-		match_result[duel_count++] = player;
+		res = player;
 		tp_player = 1 - player;
 	}
+
+	// Guardar solo si cabe dentro del best-of actual
+	if(duel_count < match_max_duels) {
+		match_result[duel_count] = res;
+	}
+	duel_count++;
+
 	EndDuel();
 	DuelEndProc();
 	event_del(etimer);

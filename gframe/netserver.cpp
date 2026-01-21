@@ -363,7 +363,15 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 		auto pkt = &packet;
 		if(pkt->info.rule > CURRENT_RULE)
 			pkt->info.rule = CURRENT_RULE;
-		if(pkt->info.mode > MODE_TAG)
+		auto is_valid_mode = [](uint8_t m) {
+			return m == MODE_SINGLE
+				|| m == MODE_MATCH
+				|| m == MODE_TAG
+				|| m == MODE_MATCH_BO5
+				|| m == MODE_MATCH_BO7;
+		};
+
+		if(!is_valid_mode(pkt->info.mode))
 			pkt->info.mode = MODE_SINGLE;
 		bool found = false;
 		for (const auto& lflist : deckManager._lfList) {
@@ -378,20 +386,44 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 			else
 				pkt->info.lflist = 0;
 		}
-		if (pkt->info.mode == MODE_SINGLE) {
+		auto is_valid_mode = [](uint8_t m) {
+			return m == MODE_SINGLE
+				|| m == MODE_MATCH
+				|| m == MODE_TAG
+				|| m == MODE_MATCH_BO5
+				|| m == MODE_MATCH_BO7;
+		};
+
+		if(!is_valid_mode(pkt->info.mode))
+			pkt->info.mode = MODE_SINGLE;
+
+		auto is_match_mode = [](uint8_t m) {
+			return m == MODE_MATCH
+				|| m == MODE_MATCH_BO5
+				|| m == MODE_MATCH_BO7;
+		};
+
+		if(pkt->info.mode == MODE_SINGLE) {
 			duel_mode = new SingleDuel(false);
 			duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
-		}
-		else if (pkt->info.mode == MODE_MATCH) {
-			duel_mode = new SingleDuel(true);
+
+		} else if(is_match_mode(pkt->info.mode)) {
+			auto* sd = new SingleDuel(true);
+
+			if(pkt->info.mode == MODE_MATCH_BO5) sd->SetMatchBestOf(5);
+			else if(pkt->info.mode == MODE_MATCH_BO7) sd->SetMatchBestOf(7);
+			else sd->SetMatchBestOf(3);
+
+			duel_mode = sd;
 			duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
-		}
-		else if (pkt->info.mode == MODE_TAG) {
+
+		} else if(pkt->info.mode == MODE_TAG) {
 			duel_mode = new TagDuel();
 			duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, TagDuel::TagTimer, duel_mode);
-		}
-		else
+		} else {
 			return;
+		}
+
 		duel_mode->host_info = pkt->info;
 		BufferIO::NullTerminate(pkt->name);
 		BufferIO::NullTerminate(pkt->pass);
