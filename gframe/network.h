@@ -230,6 +230,9 @@ public:
 	virtual void Surrender(DuelPlayer* dp) = 0;
 	virtual void GetResponse(DuelPlayer* dp, unsigned char* pdata, unsigned int len) = 0;
 	virtual void TimeConfirm(DuelPlayer* dp) = 0;
+#ifdef YGOPRO_SERVER_MODE
+	virtual void RequestField(DuelPlayer* dp) = 0;
+#endif
 	virtual void EndDuel() = 0;
 
 public:
@@ -336,7 +339,7 @@ public:
 #define MODE_MATCH		0x1
 #define MODE_TAG		0x2
 #define MODE_MATCH_BO5  0x3
-#define MODE_MATCH_BO10 0x4
+#define MODE_MATCH_BO7 0x4
 
 #define DUEL_STAGE_BEGIN		0
 #define DUEL_STAGE_FINGER		1

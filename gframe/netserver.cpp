@@ -14,9 +14,74 @@ evconnlistener* NetServer::listener = 0;
 DuelMode* NetServer::duel_mode = 0;
 unsigned char NetServer::net_server_write[SIZE_NETWORK_BUFFER];
 size_t NetServer::last_sent = 0;
-int g_match_best_of_cli = 0; // 0 = no definido (default bo3)
 
+#ifdef YGOPRO_SERVER_MODE
+extern unsigned short replay_mode;
+extern HostInfo game_info;
+
+void NetServer::InitDuel()
+{
+	if(game_info.mode == MODE_SINGLE) {
+		duel_mode = new SingleDuel(false);
+		duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
+	} else if(game_info.mode == MODE_MATCH) {
+		duel_mode = new SingleDuel(true);
+		duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
+	} else if(game_info.mode == MODE_TAG) {
+		duel_mode = new TagDuel();
+		duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, TagDuel::TagTimer, duel_mode);
+	}
+
+	CTOS_CreateGame* pkt = new CTOS_CreateGame;
+	
+	pkt->info.mode = game_info.mode;
+	pkt->info.start_hand = game_info.start_hand;
+	pkt->info.start_lp = game_info.start_lp;
+	pkt->info.draw_count = game_info.draw_count;
+	pkt->info.no_check_deck = game_info.no_check_deck;
+	pkt->info.no_shuffle_deck = game_info.no_shuffle_deck;
+	pkt->info.duel_rule = game_info.duel_rule;
+	pkt->info.rule = game_info.rule;
+	pkt->info.time_limit = game_info.time_limit;
+
+	if(game_info.lflist == 999)
+		pkt->info.lflist = 0;
+	else if(game_info.lflist >= deckManager._lfList.size())
+		pkt->info.lflist = deckManager._lfList[0].hash;
+	else
+		pkt->info.lflist = deckManager._lfList[game_info.lflist].hash;
+	
+	duel_mode->host_info = pkt->info;
+	
+	BufferIO::CopyWStr(pkt->name, duel_mode->name, 20);
+	BufferIO::CopyWStr(pkt->pass, duel_mode->pass, 20);
+}
+
+bool NetServer::IsCanIncreaseTime(unsigned short gameMsg, void *pdata, unsigned int len) {
+	int32_t* ivalue = (int32_t*)pdata;
+	switch(gameMsg) {
+		case MSG_RETRY:
+		case MSG_SELECT_UNSELECT_CARD:
+			return false;
+		case MSG_SELECT_CHAIN:
+			return ivalue[0] != -1;
+		case MSG_SELECT_IDLECMD: {
+			int32_t idleChoice = ivalue[0] & 0xffff;
+			return idleChoice <= 5; // no shuffle hand, enter other phases
+		}
+		case MSG_SELECT_BATTLECMD: {
+			int32_t battleChoice = ivalue[0] & 0xffff;
+			return battleChoice <= 1; // attack only
+		}
+		default:
+			return true;
+	}
+}
+
+unsigned short NetServer::StartServer(unsigned short port) {
+#else
 bool NetServer::StartServer(unsigned short port) {
+#endif //YGOPRO_SERVER_MODE
 	if(net_evbase)
 		return false;
 	net_evbase = event_base_new();
@@ -26,7 +91,11 @@ bool NetServer::StartServer(unsigned short port) {
 	std::memset(&sin, 0, sizeof sin);
 	server_port = port;
 	sin.sin_family = AF_INET;
+#ifdef SERVER_PRO2_SUPPORT
+	sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+#else
 	sin.sin_addr.s_addr = htonl(INADDR_ANY);
+#endif
 	sin.sin_port = htons(port);
 	listener = evconnlistener_new_bind(net_evbase, ServerAccept, nullptr,
 	                                   LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, -1, (sockaddr*)&sin, sizeof(sin));
@@ -37,7 +106,15 @@ bool NetServer::StartServer(unsigned short port) {
 	}
 	evconnlistener_set_error_cb(listener, ServerAcceptError);
 	std::thread(ServerThread).detach();
+#ifdef YGOPRO_SERVER_MODE
+	evutil_socket_t fd = evconnlistener_get_fd(listener);
+	socklen_t addrlen = sizeof(sockaddr);
+	sockaddr_in addr;
+	getsockname(fd, (sockaddr*)&addr, &addrlen);
+	return ntohs(addr.sin_port);
+#else
 	return true;
+#endif //YGOPRO_SERVER_MODE
 }
 bool NetServer::StartBroadcast() {
 	if(!net_evbase)
@@ -64,7 +141,12 @@ void NetServer::StopServer() {
 		return;
 	if(duel_mode)
 		duel_mode->EndDuel();
+#ifdef YGOPRO_SERVER_MODE // For solving the problem of connection lost after duel. See https://github.com/Fluorohydride/ygopro/issues/2067 for details.
+	timeval etv = { 0, 1 };
+	event_base_loopexit(net_evbase, &etv);
+#else
 	event_base_loopexit(net_evbase, 0);
+#endif
 }
 void NetServer::StopBroadcast() {
 	if(!net_evbase || !broadcast_ev)
@@ -187,7 +269,11 @@ void NetServer::DisconnectPlayer(DuelPlayer* dp) {
 void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 	auto pdata = data;
 	unsigned char pktType = BufferIO::Read<uint8_t>(pdata);
+#ifdef YGOPRO_SERVER_MODE
+	if((pktType != CTOS_SURRENDER) && (pktType != CTOS_CHAT) && (pktType != CTOS_REQUEST_FIELD) && (dp->state == 0xff || (dp->state && dp->state != pktType)))
+#else
 	if((pktType != CTOS_SURRENDER) && (pktType != CTOS_CHAT) && (dp->state == 0xff || (dp->state && dp->state != pktType)))
+#endif
 		return;
 	switch(pktType) {
 	case CTOS_RESPONSE: {
@@ -267,16 +353,21 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 		*/
 		break;
 	}
+	
 	case CTOS_CREATE_GAME: {
 		if(dp->game || duel_mode)
 			return;
-		if (len < 1 + (int)sizeof(CTOS_CreateGame))
+		if(len < 1 + (int)sizeof(CTOS_CreateGame))
 			return;
+
 		CTOS_CreateGame packet;
 		std::memcpy(&packet, pdata, sizeof packet);
 		auto pkt = &packet;
+
 		if(pkt->info.rule > CURRENT_RULE)
 			pkt->info.rule = CURRENT_RULE;
+
+		// ✅ Validación robusta de modo (UNA sola lambda)
 		auto is_valid_mode = [](uint8_t m) {
 			return m == MODE_SINGLE
 				|| m == MODE_MATCH
@@ -288,61 +379,66 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 		if(!is_valid_mode(pkt->info.mode))
 			pkt->info.mode = MODE_SINGLE;
 
+		// lflist validation
 		bool found = false;
-		for (const auto& lflist : deckManager._lfList) {
+		for(const auto& lflist : deckManager._lfList) {
 			if(pkt->info.lflist == lflist.hash) {
 				found = true;
 				break;
 			}
 		}
-		if (!found) {
-			if (deckManager._lfList.size())
+		if(!found) {
+			if(deckManager._lfList.size())
 				pkt->info.lflist = deckManager._lfList[0].hash;
 			else
 				pkt->info.lflist = 0;
 		}
-		auto is_match_mode = [](uint8_t m) {
-			return m == MODE_MATCH
-				|| m == MODE_MATCH_BO5
-				|| m == MODE_MATCH_BO7;
-		};
 
-		if (pkt->info.mode == MODE_SINGLE) {
+		// crear duel_mode
+		if(pkt->info.mode == MODE_SINGLE) {
 			duel_mode = new SingleDuel(false);
 			duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
 
-		} else if (is_match_mode(pkt->info.mode)) {
+		} else if(pkt->info.mode == MODE_MATCH
+			|| pkt->info.mode == MODE_MATCH_BO5
+			|| pkt->info.mode == MODE_MATCH_BO7) {
+
 			auto* sd = new SingleDuel(true);
 
-			// BoN estático según el mode
-			if(pkt->info.mode == MODE_MATCH) {
-				sd->SetMatchBestOf(3);   // Bo3 (default)
-			} else if(pkt->info.mode == MODE_MATCH_BO5) {
-				sd->SetMatchBestOf(5);   // Bo5
+			// ✅ setear best-of estático según modo
+			if(pkt->info.mode == MODE_MATCH_BO5) {
+				sd->SetMatchBestOf(5);
 			} else if(pkt->info.mode == MODE_MATCH_BO7) {
-				sd->SetMatchBestOf(7);  // Bo7
+				sd->SetMatchBestOf(7);
+			} else {
+				sd->SetMatchBestOf(3); // match clásico
 			}
+
+			// ✅ OPCIONAL: compatibilidad con clientes que no entienden mode=3/4
+			// pkt->info.mode = MODE_MATCH;
 
 			duel_mode = sd;
 			duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
 
-		} else if (pkt->info.mode == MODE_TAG) {
+		} else if(pkt->info.mode == MODE_TAG) {
 			duel_mode = new TagDuel();
 			duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, TagDuel::TagTimer, duel_mode);
-
 		} else {
 			return;
 		}
 
 		duel_mode->host_info = pkt->info;
+
 		BufferIO::NullTerminate(pkt->name);
 		BufferIO::NullTerminate(pkt->pass);
 		BufferIO::CopyCharArray(pkt->name, duel_mode->name);
 		BufferIO::CopyCharArray(pkt->pass, duel_mode->pass);
+
 		duel_mode->JoinGame(dp, 0, true);
 		StartBroadcast();
 		break;
 	}
+
 	case CTOS_JOIN_GAME: {
 		if (!duel_mode)
 			return;
@@ -375,6 +471,14 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 		duel_mode->ToObserver(dp);
 		break;
 	}
+#ifdef YGOPRO_SERVER_MODE
+	case CTOS_HS_NOTREADY: {
+		if (!duel_mode || duel_mode->pduel)
+			return;
+		duel_mode->PlayerReady(dp, false);
+		break;
+	}
+#else
 	case CTOS_HS_READY:
 	case CTOS_HS_NOTREADY: {
 		if (!duel_mode || duel_mode->pduel)
@@ -382,6 +486,7 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 		duel_mode->PlayerReady(dp, (CTOS_HS_NOTREADY - pktType) != 0);
 		break;
 	}
+#endif
 	case CTOS_HS_KICK: {
 		if (!duel_mode || duel_mode->pduel)
 			return;
@@ -399,6 +504,14 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 		duel_mode->StartDuel(dp);
 		break;
 	}
+#ifdef YGOPRO_SERVER_MODE
+	case CTOS_REQUEST_FIELD: {
+		if(!dp->game || !duel_mode->pduel)
+			break;
+		duel_mode->RequestField(dp);
+		break;
+	}
+#endif
 	}
 }
 size_t NetServer::CreateChatPacket(unsigned char* src, int src_size, unsigned char* dst, uint16_t dst_player_type) {
