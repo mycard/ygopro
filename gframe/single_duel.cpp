@@ -29,6 +29,10 @@ void SingleDuel::SetMatchBestOf(int best_of) {
 	// importante: reset del match
 	duel_count = 0;
 	std::memset(match_result, 2, sizeof(match_result)); // 2 = draw (valor neutro)
+
+	
+    logerr("SetMatchBestOf(original=%d => effective=%d) max_duels=%u wins_required=%u",
+           original, best_of, (unsigned)match_max_duels, (unsigned)match_wins_required);
 }
 
 void SingleDuel::Chat(DuelPlayer* dp, unsigned char* pdata, int len) {
