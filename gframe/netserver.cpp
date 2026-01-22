@@ -24,9 +24,28 @@ void NetServer::InitDuel()
 	if(game_info.mode == MODE_SINGLE) {
 		duel_mode = new SingleDuel(false);
 		duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
-	} else if(game_info.mode == MODE_MATCH) {
-		duel_mode = new SingleDuel(true);
+
+	} else if(game_info.mode == MODE_MATCH
+	       || game_info.mode == MODE_MATCH_BO5
+	       || game_info.mode == MODE_MATCH_BO7) {
+
+		auto* sd = new SingleDuel(true);
+
+		if(game_info.mode == MODE_MATCH_BO5) {
+			sd->SetMatchBestOf(5);
+		} else if(game_info.mode == MODE_MATCH_BO7) {
+			sd->SetMatchBestOf(7);
+		} else {
+			sd->SetMatchBestOf(3); // match clásico
+		}
+
+		duel_mode = sd;
 		duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, SingleDuel::SingleTimer, duel_mode);
+
+		// Opcional (recomendado si hay UI/clients que no conocen 0x3/0x4):
+		// game_info.mode = MODE_MATCH;
+		// duel_mode->host_info.mode = MODE_MATCH;
+
 	} else if(game_info.mode == MODE_TAG) {
 		duel_mode = new TagDuel();
 		duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, TagDuel::TagTimer, duel_mode);
