@@ -1086,6 +1086,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			is_starting_dragging = false;
 			irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
 			if(!is_draging && !mainGame->is_siding && root->getElementFromPoint(mouse_pos) == mainGame->imgCard) {
+				soundManager.PlaySoundEffect(SOUND_CARD_DROP);
 				ShowBigCard(mainGame->showingcode, 1);
 				break;
 			}
@@ -1115,6 +1116,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 		case irr::EMIE_LMOUSE_DOUBLE_CLICK: {
 			irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
 			if(!is_draging && !mainGame->is_siding && root->getElementFromPoint(mouse_pos) == root && hovered_code) {
+				soundManager.PlaySoundEffect(SOUND_CARD_DROP);
 				ShowBigCard(hovered_code, 1);
 				break;
 			}
