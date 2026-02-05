@@ -1,6 +1,7 @@
 #include "image_manager.h"
 #include "game.h"
 #include <thread>
+#include <vector>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -223,18 +224,33 @@ irr::video::ITexture* ImageManager::GetTextureFromFile(const char* file, irr::s3
 	mysnprintf(name, "%s/%d_%d", file, width, height);
 	return addTexture(name, img, width, height);
 }
+void* ImageManager::LoadFromSearchPathsImpl(int code, const char* subpath, const std::vector<const char*>& extensions,
+                                              void* (*callback)(void*, const char*), void* userdata) {
+	// Build base path list
+	std::vector<std::string> basePaths;
+	basePaths.push_back("expansions/");
+	basePaths.push_back("");
+	
+	// Try all combinations
+	char file[256];
+	for(const auto& base : basePaths) {
+		for(const auto& ext : extensions) {
+			mysnprintf(file, "%s%s/%d.%s", base.c_str(), subpath, code, ext);
+			void* result = callback(userdata, file);
+			if(result != nullptr) {
+				return result;
+			}
+		}
+	}
+	return nullptr;
+}
 /** Load card picture from `expansions` or `pics` folder.
  * Files in the expansions directory have priority, allowing custom pictures to be loaded without modifying the original files.
  * @return Image pointer. Must be dropped after use. */
 irr::video::IImage* ImageManager::GetImage(int code) {
-	char file[256];
-	mysnprintf(file, "expansions/pics/%d.jpg", code);
-	irr::video::IImage* img = driver->createImageFromFile(file);
-	if(img == nullptr) {
-		mysnprintf(file, "pics/%d.jpg", code);
-		img = driver->createImageFromFile(file);
-	}
-	return img;
+	return LoadFromSearchPaths(code, "pics", {"jpg"}, [this](const char* file) {
+		return driver->createImageFromFile(file);
+	});
 }
 /** Load card picture.
  * @return Texture pointer. Remove via `driver->removeTexture` (do not `drop`). */
@@ -390,31 +406,13 @@ irr::video::ITexture* ImageManager::GetTextureField(int code) {
 	if(tit == tFields.end()) {
 		irr::s32 width = 512 * mainGame->xScale;
 		irr::s32 height = 512 * mainGame->yScale;
-		char file[256];
-		mysnprintf(file, "expansions/pics/field/%d.png", code);
-		irr::video::ITexture* img = GetTextureFromFile(file, width, height);
-		if(img == nullptr) {
-			mysnprintf(file, "expansions/pics/field/%d.jpg", code);
-			img = GetTextureFromFile(file, width, height);
-		}
-		if(img == nullptr) {
-			mysnprintf(file, "pics/field/%d.png", code);
-			img = GetTextureFromFile(file, width, height);
-		}
-		if(img == nullptr) {
-			mysnprintf(file, "pics/field/%d.jpg", code);
-			img = GetTextureFromFile(file, width, height);
-			if(img == nullptr) {
-				tFields[code] = nullptr;
-				return nullptr;
-			} else {
-				tFields[code] = img;
-				return img;
-			}
-		} else {
-			tFields[code] = img;
-			return img;
-		}
+		
+		irr::video::ITexture* img = LoadFromSearchPaths(code, "pics/field", {"png", "jpg"}, [this, width, height](const char* file) {
+			return GetTextureFromFile(file, width, height);
+		});
+		
+		tFields[code] = img;
+		return img;
 	}
 	if(tit->second)
 		return tit->second;

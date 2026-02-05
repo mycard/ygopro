@@ -12,6 +12,21 @@ namespace ygo {
 class ImageManager {
 private:
 	irr::video::ITexture* addTexture(const char* name, irr::video::IImage* srcimg, irr::s32 width, irr::s32 height);
+	
+	// Internal implementation using void* for type erasure
+	void* LoadFromSearchPathsImpl(int code, const char* subpath, const std::vector<const char*>& extensions, void* (*callback)(void*, const char*), void* userdata);
+	
+	// Load file from search paths (expansions, default) with callback
+	template<typename Func>
+	auto LoadFromSearchPaths(int code, const char* subpath, const std::vector<const char*>& extensions, Func callback) -> decltype(callback("")) {
+		using RetType = decltype(callback(""));
+		auto wrapper = [](void* userdata, const char* file) -> void* {
+			auto& func = *static_cast<Func*>(userdata);
+			return static_cast<void*>(func(file));
+		};
+		return static_cast<RetType>(LoadFromSearchPathsImpl(code, subpath, extensions, wrapper, &callback));
+	}
+	
 public:
 	bool Initial();
 	void SetDevice(irr::IrrlichtDevice* dev);
