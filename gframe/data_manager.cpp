@@ -1,6 +1,7 @@
 #include "data_manager.h"
 #include "game.h"
 #if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
+#include "client_card.h"
 #include "spmemvfs/spmemvfs.h"
 #endif
 
@@ -245,34 +246,26 @@ const wchar_t* DataManager::GetDesc(uint32_t strCode) const {
 		return csit->second.desc[offset].c_str();
 	return unknown_string;
 }
-const wchar_t* DataManager::GetSysString(int code) const {
-	if (code < 0 || code > MAX_STRING_ID)
-		return unknown_string;
-	auto csit = _sysStrings.find(code);
-	if(csit == _sysStrings.end())
+const wchar_t* DataManager::GetMapString(const wstring_map& table, uint32_t code) const {
+	auto csit = table.find(code);
+	if (csit == table.end())
 		return unknown_string;
 	return csit->second.c_str();
 }
-const wchar_t* DataManager::GetVictoryString(int code) const {
-	auto csit = _victoryStrings.find(code);
-	if(csit == _victoryStrings.end())
-		return unknown_string;
-	return csit->second.c_str();
+const wchar_t* DataManager::GetSysString(uint32_t code) const {
+	return GetMapString(_sysStrings, code);
 }
-const wchar_t* DataManager::GetCounterName(int code) const {
-	auto csit = _counterStrings.find(code);
-	if(csit == _counterStrings.end())
-		return unknown_string;
-	return csit->second.c_str();
+const wchar_t* DataManager::GetVictoryString(uint32_t code) const {
+	return GetMapString(_victoryStrings, code);
 }
-const wchar_t* DataManager::GetSetName(int code) const {
-	auto csit = _setnameStrings.find(code);
-	if(csit == _setnameStrings.end())
-		return unknown_string;
-	return csit->second.c_str();
+const wchar_t* DataManager::GetCounterName(uint32_t code) const {
+	return GetMapString(_counterStrings, code);
 }
-std::vector<unsigned int> DataManager::GetSetCodes(std::wstring setname) const {
-	std::vector<unsigned int> matchingCodes;
+const wchar_t* DataManager::GetSetName(uint32_t code) const {
+	return GetMapString(_setnameStrings, code);
+}
+std::vector<uint32_t> DataManager::GetSetCodes(std::wstring setname) const {
+	std::vector<uint32_t> matchingCodes;
 	for(auto csit = _setnameStrings.begin(); csit != _setnameStrings.end(); ++csit) {
 		auto xpos = csit->second.find_first_of(L'|');//setname|another setname or extra info
 		if(setname.size() < 2) {
@@ -305,11 +298,10 @@ const wchar_t* DataManager::FormatLocation(int location, int sequence) const {
 		else
 			return GetSysString(1009);
 	}
-	int i = 1000;
 	int string_id = 0;
-	for (unsigned filter = LOCATION_DECK; filter <= LOCATION_PZONE; filter <<= 1, ++i) {
-		if (filter == location) {
-			string_id = i;
+	for (int i = 0; i < 10; ++i) {
+		if ((0x1U << i) == location) {
+			string_id = STRING_ID_LOCATION + i;
 			break;
 		}
 	}
@@ -317,6 +309,11 @@ const wchar_t* DataManager::FormatLocation(int location, int sequence) const {
 		return GetSysString(string_id);
 	else
 		return unknown_string;
+}
+const wchar_t* DataManager::FormatLocation(ClientCard* card) const {
+	if (!card)
+		return unknown_string;
+	return FormatLocation(card->location, card->sequence);
 }
 std::wstring DataManager::FormatAttribute(unsigned int attribute) const {
 	std::wstring buffer;
@@ -328,7 +325,7 @@ std::wstring DataManager::FormatAttribute(unsigned int attribute) const {
 		}
 	}
 	if (buffer.empty())
-		return std::wstring(unknown_string);
+		buffer = unknown_string;
 	return buffer;
 }
 std::wstring DataManager::FormatRace(unsigned int race) const {
@@ -341,7 +338,7 @@ std::wstring DataManager::FormatRace(unsigned int race) const {
 		}
 	}
 	if (buffer.empty())
-		return std::wstring(unknown_string);
+		buffer = unknown_string;
 	return buffer;
 }
 std::wstring DataManager::FormatType(unsigned int type) const {
@@ -354,7 +351,7 @@ std::wstring DataManager::FormatType(unsigned int type) const {
 		}
 	}
 	if (buffer.empty())
-		return std::wstring(unknown_string);
+		buffer = unknown_string;
 	return buffer;
 }
 std::wstring DataManager::FormatSetName(const uint16_t setcode[]) const {
@@ -368,7 +365,7 @@ std::wstring DataManager::FormatSetName(const uint16_t setcode[]) const {
 		buffer.append(setname);
 	}
 	if (buffer.empty())
-		return std::wstring(unknown_string);
+		buffer = unknown_string;
 	return buffer;
 }
 std::wstring DataManager::FormatLinkMarker(unsigned int link_marker) const {
