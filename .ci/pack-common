@@ -1,0 +1,61 @@
+#!/bin/bash
+set -o errexit
+set -o nounset
+set -o pipefail
+set -x
+
+source .ci/asset-branch
+
+_pack() {
+  local platform="$1"
+  shift
+
+  mkdir -p dist replay
+
+  local archive="dist/ygopro-${CI_COMMIT_REF_NAME}-${platform}-${TARGET_LOCALE}.tar.zst"
+
+  local files=(
+    LICENSE
+    README.md
+    lflist.conf
+    strings.conf
+    system.conf
+    cards.cdb
+    script
+    textures
+    deck
+    single
+    replay
+    sound
+    bot.conf
+    pack
+    fonts
+  )
+
+  case "$platform" in
+    linux|darwin)
+      files+=(
+        windbot
+        bot
+      )
+      ;;
+  esac
+
+  if [[ "${ASSET_BRANCH_NAME}" != "develop" ]]; then
+    files+=("pics")
+  fi
+
+  # 再拼上各平台特有文件
+  files+=("$@")
+
+  # 过滤不存在的路径，避免 tar 报错导致 CI 失败
+  local existing=()
+  local f
+  for f in "${files[@]}"; do
+    if [[ -e "$f" ]]; then
+      existing+=("$f")
+    fi
+  done
+
+  tar --zstd -cf "$archive" --exclude='.git*' "${existing[@]}"
+}
