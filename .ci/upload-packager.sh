@@ -31,7 +31,7 @@ handleErrorMessage() {
 runForDepot() {
   platform=$1
   locale=$2
-  archivePath="./dist/$appName-$appVersion-$platform-$locale.tar.zst"
+  archivePath="./dist/ygopro-$appVersion-$platform-$locale.tar.zst"
   suffix="?platform=$platform&locale=$locale&arch=generic"
   echo "Uploading $archivePath"
   result=$(curl -H "$header" -X POST "$apiRoot/release/api/build/$appName/${appVersion}${suffix}" -F file=@$archivePath)
