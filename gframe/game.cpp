@@ -196,7 +196,7 @@ bool Game::Initialize() {
 	//main menu
 	wchar_t strbuf[256];
 	myswprintf(strbuf, L"YGOPro Version:%X.0%X.%X", (PRO_VERSION & 0xf000U) >> 12, (PRO_VERSION & 0x0ff0U) >> 4, PRO_VERSION & 0x000fU);
-	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 415), false, strbuf);
+	wMainMenu = env->addWindow(irr::core::rect<irr::s32>(370, 200, 650, 500), false, strbuf);
 	wMainMenu->getCloseButton()->setVisible(false);
 	btnLanMode = env->addButton(irr::core::rect<irr::s32>(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, dataManager.GetSysString(1200));
 	btnSingleMode = env->addButton(irr::core::rect<irr::s32>(10, 65, 270, 95), wMainMenu, BUTTON_SINGLE_MODE, dataManager.GetSysString(1201));
@@ -204,6 +204,17 @@ bool Game::Initialize() {
 //	btnTestMode = env->addButton(irr::core::rect<irr::s32>(10, 135, 270, 165), wMainMenu, BUTTON_TEST_MODE, dataManager.GetSysString(1203));
 	btnDeckEdit = env->addButton(irr::core::rect<irr::s32>(10, 135, 270, 165), wMainMenu, BUTTON_DECK_EDIT, dataManager.GetSysString(1204));
 	btnModeExit = env->addButton(irr::core::rect<irr::s32>(10, 170, 270, 200), wMainMenu, BUTTON_MODE_EXIT, dataManager.GetSysString(1210));
+
+	env->addStaticText(L"此版本为MyCard测试版本，", irr::core::rect<irr::s32>(10, 220, 270, 240), false, false, wMainMenu);
+	env->addStaticText(L"遇到问题请务必反馈，群：553241437。", irr::core::rect<irr::s32>(10, 240, 270, 260), false, false, wMainMenu);
+	env->addStaticText(L"不要觉得会有别人报告，别人也会这么想。", irr::core::rect<irr::s32>(10, 260, 270, 280), false, false, wMainMenu);
+
+	env->addStaticText(L"目前测试的内容：\n\n\
+优化锁帧处理。\n\
+选择卡片对话框随窗口缩放。\n\
+宣言卡名时可按字段查询。\n\
+", irr::core::rect<irr::s32>(300, 30, 550, 390), false, true, wMainMenu);
+
 	//lan mode
 	wLanWindow = env->addWindow(irr::core::rect<irr::s32>(220, 100, 800, 520), false, dataManager.GetSysString(1200));
 	wLanWindow->getCloseButton()->setVisible(false);
@@ -1946,7 +1957,8 @@ void Game::OnResize() {
 			button->setImage(imageManager.tButtonFacedown[imgInfo.first]);
 	}
 
-	wMainMenu->setRelativePosition(ResizeWin(370, 200, 650, 415));
+	irr::core::recti menuposition = ResizeWin(370, 200, 650, 415);
+	wMainMenu->setRelativePosition(irr::core::recti(menuposition.UpperLeftCorner.X, menuposition.UpperLeftCorner.Y, menuposition.LowerRightCorner.X + 300, menuposition.LowerRightCorner.Y + 85));
 	wDeckEdit->setRelativePosition(Resize(309, 5, 605, 130));
 	cbDBDecks->setRelativePosition(Resize(80, 35, 220, 60));
 	btnClearDeck->setRelativePosition(Resize(115, 99, 165, 120));
