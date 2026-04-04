@@ -10,6 +10,8 @@ token=$(echo $loginInfo | jq '.token' | sed 's/"//g')
 header="Authorization: $token"
 echo "Login succeeded."
 
+source .ci/asset-branch
+
 appName="ygopro"
 
 if [[ "$ASSET_BRANCH_NAME" == "develop" ]]; then
@@ -36,8 +38,6 @@ runForDepot() {
   handleErrorMessage "$result"
   echo "$result" | jq .
 }
-
-source .ci/asset-branch
 
 runForDepot win32 zh-CN
 runForDepot linux zh-CN
