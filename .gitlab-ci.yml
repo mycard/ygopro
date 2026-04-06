@@ -42,6 +42,7 @@ mat_common:
       - freetype
       - sqlite3
       - event
+      - jpeg
       - irrlicht
       - miniaudio
 
