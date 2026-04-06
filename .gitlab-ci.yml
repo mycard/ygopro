@@ -96,9 +96,9 @@ mat_windows:
     - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-windows.zip
     - 7z x -y premake-5.0.0-beta7-windows.zip
     # nasm.exe
-    - wget https://www.nasm.us/pub/nasm/releasebuilds/3.01/win64/nasm-3.01-win64.zip
+    - wget https://mat-cacher.moenext.com/https://www.nasm.us/pub/nasm/releasebuilds/3.01/win64/nasm-3.01-win64.zip
     - 7z x -y nasm-3.01-win64.zip
-    - copy nasm-3.01/nasm.exe .
+    - cp nasm-3.01/nasm.exe .
   artifacts:
     paths:
       - premake5.exe
