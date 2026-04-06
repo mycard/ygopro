@@ -26,6 +26,10 @@ mat_common:
     # event
     - wget -O - https://mat-cacher.moenext.com/https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz | tar zfx -
     - mv libevent-2.1.12-stable event
+    # jpeg
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.4.1/libjpeg-turbo-3.1.4.1.tar.gz | tar zfx -
+    - mv libjpeg-turbo-3.1.4.1 jpeg
+    - cp jpeg/src/jversion.h.in jpeg/src/jversion.h
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
     # miniaudio
@@ -128,7 +132,8 @@ exec_windows:
     BUILD_OPUS_VORBIS: '1'
     AUDIO_LIB: 'miniaudio'
     MINIAUDIO_SUPPORT_OPUS_VORBIS: '1'
-    BUILD_JPEG_PNG: '1'
+    BUILD_JPEG: '1'
+    BUILD_PNG_IRRLICHT: '1'
   before_script:
     - ./.ci/configure-libevent.sh
 
@@ -143,7 +148,7 @@ exec_linux:
     - mat_submodules
   script:
     - ./.ci/configure-audio.sh
-    - premake5 gmake --build-freetype --build-sqlite
+    - premake5 gmake
     - cd build
     - make config=release -j$(nproc)
     - cd ..
