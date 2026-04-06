@@ -95,9 +95,14 @@ mat_windows:
     # premake5.exe
     - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-windows.zip
     - 7z x -y premake-5.0.0-beta7-windows.zip
+    # nasm.exe
+    - wget https://www.nasm.us/pub/nasm/releasebuilds/3.01/win64/nasm-3.01-win64.zip
+    - 7z x -y nasm-3.01-win64.zip
+    - copy nasm-3.01/nasm.exe .
   artifacts:
     paths:
       - premake5.exe
+      - nasm.exe
 
 ._exec_build:
   stage: build
@@ -114,6 +119,7 @@ exec_windows:
     - mat_submodules
   script:
     - bash -c 'cp -rf premake/* . ; cp -rf resource/* .'
+    - copy nasm.exe C:\Windows\
     - '.\premake5.exe vs2019'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
     - copy bin\release\x64\ygopro.exe .
