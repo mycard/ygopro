@@ -149,7 +149,7 @@ end
 
     filter "system:linux"
 if not SERVER_MODE then
-        links { "GL", "X11", "Xxf86vm", "dl", "pthread" }
+        links { "GL", "X11", "dl", "pthread" }
         linkoptions { "-fopenmp" }
 end
 if SERVER_MODE then -- support old gcc

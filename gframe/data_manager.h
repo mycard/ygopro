@@ -116,6 +116,9 @@ public:
 	std::wstring FormatType(unsigned int type) const;
 	std::wstring FormatSetName(const uint16_t setcode[]) const;
 	std::wstring FormatLinkMarker(unsigned int link_marker) const;
+	static wchar_t NormalizeChar(wchar_t c);
+	static void NormalizeString(const wchar_t* src, wchar_t* dst, size_t dst_size);
+	static bool CardNameContains(const wchar_t* haystack, const wchar_t* needle);
 
 	wstring_map _counterStrings;
 	wstring_map _victoryStrings;
@@ -125,7 +128,7 @@ public:
 	char errmsg[512]{};
 	const wchar_t* unknown_string{ L"???" };
 #if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
-	irr::io::IFileSystem* FileSystem{};
+	irr::io::IFileSystem* IrrFileSystem{};
 #endif
 
 	static constexpr uint32_t STRING_ID_LOCATION = 1000;
