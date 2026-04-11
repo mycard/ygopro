@@ -3,10 +3,12 @@ include "lzma/."
 project "YGOPro"
     kind "WindowedApp"
     rtti "Off"
-    openmp "On"
+    if USE_OPENMP then
+        openmp "On"
+    end
 
     files { "*.cpp", "*.h" }
-    includedirs { "../ocgcore" }
+    includedirs { "../ocgcore", JPEG_INCLUDE_DIR }
     links { "ocgcore", "clzma", LUA_LIB_NAME, "sqlite3", "irrlicht", JPEG_LIB_NAME, "freetype", "event" }
 
     if not BUILD_LUA then
@@ -32,10 +34,7 @@ project "YGOPro"
         libdirs { PNG_LIB_DIR }
     end
 
-    if BUILD_JPEG then
-        includedirs { JPEG_INCLUDE_DIR }
-    else
-        includedirs { JPEG_INCLUDE_DIR }
+    if not BUILD_JPEG then
         libdirs { JPEG_LIB_DIR }
     end
 
@@ -99,7 +98,6 @@ project "YGOPro"
         cppdialect "C++14"
 
     filter "system:macosx"
-        openmp "Off"
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework" }
         defines { "GL_SILENCE_DEPRECATION" }
         if MAC_ARM then
@@ -114,7 +112,9 @@ project "YGOPro"
 
     filter "system:linux"
         links { "GL", "X11", "dl", "pthread" }
-        linkoptions { "-fopenmp" }
+        if USE_OPENMP then
+            linkoptions { "-fopenmp" }
+        end
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "IrrKlang" }
             linkoptions{ IRRKLANG_LINK_RPATH }
