@@ -4,4 +4,4 @@ set -x
 
 source .ci/pack-common
 
-_pack win32 ygopro.exe vcomp140.dll Bot.exe WindBot
+_pack win32 ygopro.exe Bot.exe WindBot
