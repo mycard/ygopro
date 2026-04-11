@@ -26,15 +26,17 @@ public:
 	static event_base* net_evbase;
 	static void InitDuel();
 	static unsigned short StartServer(unsigned short port);
+	static void StopServer();
+	static void StopListen();
 	static bool IsCanIncreaseTime(unsigned short gameMsg, void *pdata, unsigned int len);
 #else
 	static bool StartServer(unsigned short port);
-#endif //YGOPRO_SERVER_MODE
 	static bool StartBroadcast();
 	static void StopServer();
 	static void StopBroadcast();
 	static void StopListen();
 	static void BroadcastEvent(evutil_socket_t fd, short events, void* arg);
+#endif //YGOPRO_SERVER_MODE
 	static void ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx);
 	static void ServerAcceptError(evconnlistener *listener, void* ctx);
 	static void ServerEchoRead(bufferevent* bev, void* ctx);
