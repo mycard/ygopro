@@ -33,7 +33,8 @@ int main(int argc, char* argv[]) {
 #else
 	std::setlocale(LC_CTYPE, "");
 #endif
-#if defined __APPLE__ && !defined YGOPRO_SERVER_MODE
+#ifndef YGOPRO_SERVER_MODE
+#ifdef __APPLE__
 	CFURLRef bundle_url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
 	CFURLRef bundle_base_url = CFURLCreateCopyDeletingLastPathComponent(nullptr, bundle_url);
 	CFStringRef bundle_ext = CFURLCopyPathExtension(bundle_url);
@@ -59,6 +60,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 #endif //_WIN32
+#endif //YGOPRO_SERVER_MODE
 #ifdef _WIN32
 	WORD wVersionRequested;
 	WSADATA wsaData;
