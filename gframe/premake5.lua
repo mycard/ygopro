@@ -34,11 +34,13 @@ else
 project "YGOPro"
     kind "WindowedApp"
     rtti "Off"
-    openmp "On"
+    if USE_OPENMP then
+        openmp "On"
+    end
 
     files { "*.cpp", "*.h" }
-    includedirs { "../ocgcore" }
-    links { "ocgcore", "clzma", LUA_LIB_NAME, "sqlite3", "irrlicht", "freetype", "event" }
+    includedirs { "../ocgcore", JPEG_INCLUDE_DIR }
+    links { "ocgcore", "clzma", LUA_LIB_NAME, "sqlite3", "irrlicht", JPEG_LIB_NAME, "freetype", "event" }
 end
 
     if not BUILD_LUA then
@@ -61,9 +63,13 @@ end
     end
 
 if not SERVER_MODE then
-    if not IRRLICHT_BUILD_JPEG_PNG then
-        links { "jpeg", "png" }
-        libdirs { JPEG_LIB_DIR, PNG_LIB_DIR }
+    if not BUILD_PNG_IRRLICHT then
+        links { "png" }
+        libdirs { PNG_LIB_DIR }
+    end
+
+    if not BUILD_JPEG then
+        libdirs { JPEG_LIB_DIR }
     end
 
     if BUILD_FREETYPE then
@@ -116,7 +122,7 @@ end
 if SERVER_PRO2_SUPPORT then
         targetname ("AI.Server")
 end
-        links { "ws2_32", "iphlpapi" }
+        links { "ws2_32", "iphlpapi", "winmm" }
         if USE_AUDIO and AUDIO_LIB == "irrklang" then
             links { "irrKlang" }
             if IRRKLANG_PRO then
