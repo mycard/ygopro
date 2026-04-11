@@ -84,12 +84,13 @@ int main(int argc, char* argv[]) {
 	ygo::game_info.time_limit = 180;
 	std::memset(ygo::pre_seed, 0, sizeof(ygo::pre_seed));
 	std::memset(ygo::pre_seed_specified, 0, sizeof(ygo::pre_seed_specified));
-	if (argc > 1) {
+	if (argc > 1 && argc < 13) {
+		std::fprintf(stderr, "Bad param count. Please refer to readme, or don't use any param to quick test.\n");
+		return 1;
+	}
+	else if (argc >= 13) {
 		ygo::server_port = atoi(argv[1]);
-		int lflist = atoi(argv[2]);
-		if(lflist < 0)
-			lflist = 999;
-		ygo::game_info.lflist = lflist;
+		ygo::game_info.lflist = atoi(argv[2]);
 		ygo::game_info.rule = atoi(argv[3]);
 		int mode = atoi(argv[4]);
 		if(mode > 2)

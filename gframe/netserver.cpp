@@ -33,29 +33,16 @@ void NetServer::InitDuel()
 		duel_mode->etimer = event_new(net_evbase, 0, EV_TIMEOUT | EV_PERSIST, TagDuel::TagTimer, duel_mode);
 	}
 
-	CTOS_CreateGame* pkt = new CTOS_CreateGame;
-	
-	pkt->info.mode = game_info.mode;
-	pkt->info.start_hand = game_info.start_hand;
-	pkt->info.start_lp = game_info.start_lp;
-	pkt->info.draw_count = game_info.draw_count;
-	pkt->info.no_check_deck = game_info.no_check_deck;
-	pkt->info.no_shuffle_deck = game_info.no_shuffle_deck;
-	pkt->info.duel_rule = game_info.duel_rule;
-	pkt->info.rule = game_info.rule;
-	pkt->info.time_limit = game_info.time_limit;
+	duel_mode->host_info = game_info;
 
-	if(game_info.lflist == 999)
-		pkt->info.lflist = 0;
-	else if(game_info.lflist >= deckManager._lfList.size())
-		pkt->info.lflist = deckManager._lfList[0].hash;
-	else
-		pkt->info.lflist = deckManager._lfList[game_info.lflist].hash;
-	
-	duel_mode->host_info = pkt->info;
-	
-	BufferIO::CopyWStr(pkt->name, duel_mode->name, 20);
-	BufferIO::CopyWStr(pkt->pass, duel_mode->pass, 20);
+	int32_t lflistIndex = (int32_t)game_info.lflist;
+	if(lflistIndex < 0) {
+		duel_mode->host_info.lflist = 0;
+	} else {
+		if(lflistIndex >= deckManager._lfList.size())
+			lflistIndex = 0;
+		duel_mode->host_info.lflist = deckManager._lfList[lflistIndex].hash;
+	}
 }
 
 bool NetServer::IsCanIncreaseTime(unsigned short gameMsg, void *pdata, unsigned int len) {
