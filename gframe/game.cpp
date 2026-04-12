@@ -466,10 +466,10 @@ bool Game::Initialize() {
 	chkPreferExpansionScript = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_PREFER_EXPANSION, dataManager.GetSysString(1379));
 	chkPreferExpansionScript->setChecked(gameConf.prefer_expansion_script != 0);
 	posY += 30;
-	chkSwapYesNoButton = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_SWAP_YES_NO_BUTTON, dataManager.GetSysString(1388));
+	chkSwapYesNoButton = env->addCheckBox(false, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_SWAP_YES_NO_BUTTON, L"左右互换「是/否」按钮位置");
 	chkSwapYesNoButton->setChecked(gameConf.swap_yes_no_button);
 	posY += 30;
-	chkResizeSelectWindow = env->addCheckBox(gameConf.resize_select_window, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_RESIZE_SELECT_WINDOW, dataManager.GetSysString(1387));
+	chkResizeSelectWindow = env->addCheckBox(gameConf.resize_select_window, irr::core::rect<irr::s32>(posX, posY, posX + 260, posY + 25), tabSystem, CHECKBOX_RESIZE_SELECT_WINDOW, L"随窗口缩放选择卡片对话框");
 	posY += 30;
 	env->addStaticText(dataManager.GetSysString(1282), irr::core::rect<irr::s32>(posX + 23, posY + 3, posX + 110, posY + 28), false, false, tabSystem);
 	btnWinResizeS = env->addButton(irr::core::rect<irr::s32>(posX + 115, posY, posX + 145, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_S, dataManager.GetSysString(1283));
@@ -477,7 +477,7 @@ bool Game::Initialize() {
 	btnWinResizeL = env->addButton(irr::core::rect<irr::s32>(posX + 185, posY, posX + 215, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_L, dataManager.GetSysString(1285));
 	btnWinResizeXL = env->addButton(irr::core::rect<irr::s32>(posX + 220, posY, posX + 250, posY + 25), tabSystem, BUTTON_WINDOW_RESIZE_XL, dataManager.GetSysString(1286));
 	posY += 30;
-	chkResizePopupMenu = env->addCheckBox(gameConf.resize_popup_menu > 0, irr::core::rect<irr::s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_RESIZE_POPUP_MENU, dataManager.GetSysString(1386));
+	chkResizePopupMenu = env->addCheckBox(gameConf.resize_popup_menu > 0, irr::core::rect<irr::s32>(posX, posY, posX + 120, posY + 25), tabSystem, CHECKBOX_RESIZE_POPUP_MENU, L"放大菜单");
 	scrResizePopupMenu = env->addScrollBar(true, irr::core::rect<irr::s32>(posX + 116, posY + 4, posX + 250, posY + 21), tabSystem, SCROLL_RESIZE_POPUP_MENU);
 	scrResizePopupMenu->setMax(5);
 	scrResizePopupMenu->setMin(1);
