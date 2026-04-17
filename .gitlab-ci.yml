@@ -81,7 +81,7 @@ mat_macos:
   tags:
     - linux
   script:
-    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-macosx.tar.gz | tar zfx -
     - chmod +x premake5
   artifacts:
     paths:
@@ -93,8 +93,8 @@ mat_windows:
     - linux
   script:
     # premake5.exe
-    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-windows.zip
-    - 7z x -y premake-5.0.0-beta7-windows.zip
+    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-windows.zip
+    - 7z x -y premake-5.0.0-beta8-windows.zip
     # nasm.exe
     - wget https://mat-cacher.moenext.com/https://www.nasm.us/pub/nasm/releasebuilds/3.01/win64/nasm-3.01-win64.zip
     - 7z x -y nasm-3.01-win64.zip
@@ -122,8 +122,8 @@ exec_windows:
     - bash -c 'cp event/msvc-event-config.h event/include/event2/event-config.h' # TODO: prepare-event.bat ?
     - bash -c 'cp event/WIN32-Code/nmake/evconfig-private.h event/include/evconfig-private.h'
     - copy nasm.exe C:\Windows\
-    - '.\premake5.exe vs2019'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
+    - '.\premake5.exe vs2026'
+    - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
     - copy bin\release\x64\ygopro.exe .
   artifacts:
     paths:
