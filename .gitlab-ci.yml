@@ -123,7 +123,7 @@ exec_windows:
     - bash -c 'cp event/WIN32-Code/nmake/evconfig-private.h event/include/evconfig-private.h'
     - copy nasm.exe C:\Windows\
     - '.\premake5.exe vs2026'
-    - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
+    - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.slnx /m /p:Configuration=Release /p:Platform=x64'
     - copy bin\release\x64\ygopro.exe .
   artifacts:
     paths:
