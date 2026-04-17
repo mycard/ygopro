@@ -311,6 +311,9 @@ workspace "YGOPro"
         defines { "WINVER=0x0601" } -- WIN7
         platforms { "Win32", "x64" }
 
+    filter { "system:windows", "action:vs2026" }
+        toolset "v143"
+
     filter { "system:windows", "platforms:Win32" }
         architecture "x86"
 
