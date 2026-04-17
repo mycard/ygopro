@@ -119,6 +119,8 @@ exec_windows:
     - mat_submodules
   script:
     - bash -c 'cp -rf premake/* . ; cp -rf resource/* .'
+    - bash -c 'cp event/msvc-event-config.h event/include/event2/event-config.h' # TODO: prepare-event.bat ?
+    - bash -c 'cp event/WIN32-Code/nmake/evconfig-private.h event/include/evconfig-private.h'
     - copy nasm.exe C:\Windows\
     - '.\premake5.exe vs2019'
     - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
