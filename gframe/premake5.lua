@@ -21,7 +21,7 @@ project "ygopro"
         defines { "SERVER_ZIP_SUPPORT" }
         links { "irrlicht" }
         if BUILD_IRRLICHT then
-            includedirs { IRRLICHT_INCLUDE_DIR }
+            includedirs { IRRLICHT_INCLUDE_DIR, IRRLICHT_SOURCE_DIR }
         end
     end
     if SERVER_PRO2_SUPPORT then

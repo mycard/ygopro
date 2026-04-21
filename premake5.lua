@@ -40,6 +40,7 @@ SERVER_TAG_SURRENDER_CONFIRM = false
 LUA_INCLUDE_DIR = path.getabsolute("./lua/src")
 EVENT_INCLUDE_DIR = path.getabsolute("./event/include")
 IRRLICHT_INCLUDE_DIR = path.getabsolute("./irrlicht/include")
+IRRLICHT_SOURCE_DIR = path.getabsolute("./irrlicht/source/Irrlicht")
 JPEG_INCLUDE_DIR = path.getabsolute("./jpeg/src")
 FREETYPE_CUSTOM_INCLUDE_DIR = path.getabsolute("./freetype/custom")
 FREETYPE_INCLUDE_DIR = path.getabsolute("./freetype/include")
