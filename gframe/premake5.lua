@@ -39,7 +39,7 @@ project "YGOPro"
     end
 
     files { "*.cpp", "*.h" }
-    includedirs { "../ocgcore", JPEG_INCLUDE_DIR }
+    includedirs { "../ocgcore", EVENT_INCLUDE_DIR, IRRLICHT_INCLUDE_DIR, JPEG_INCLUDE_DIR, SQLITE_INCLUDE_DIR }
     links { "ocgcore", "clzma", LUA_LIB_NAME, "sqlite3", "irrlicht", JPEG_LIB_NAME, "freetype", "event" }
 end
 
@@ -47,18 +47,12 @@ end
         libdirs { LUA_LIB_DIR }
     end
 
-    if BUILD_EVENT then
-        includedirs { "../event/include" }
-    else
-        includedirs { EVENT_INCLUDE_DIR }
+    if not BUILD_EVENT then
         libdirs { EVENT_LIB_DIR }
         links { "event_pthreads" }
     end
 
-    if BUILD_IRRLICHT then
-        includedirs { "../irrlicht/include" }
-    else
-        includedirs { IRRLICHT_INCLUDE_DIR }
+    if not BUILD_IRRLICHT then
         libdirs { IRRLICHT_LIB_DIR }
     end
 
@@ -73,17 +67,14 @@ if not SERVER_MODE then
     end
 
     if BUILD_FREETYPE then
-        includedirs { "../freetype/custom", "../freetype/include" }
+        includedirs { FREETYPE_CUSTOM_INCLUDE_DIR, FREETYPE_INCLUDE_DIR }
     else
         includedirs { FREETYPE_INCLUDE_DIR }
         libdirs { FREETYPE_LIB_DIR }
     end
 end
 
-    if BUILD_SQLITE then
-        includedirs { "../sqlite3" }
-    else
-        includedirs { SQLITE_INCLUDE_DIR }
+    if not BUILD_SQLITE then
         libdirs { SQLITE_LIB_DIR }
     end
 
@@ -92,11 +83,11 @@ if not SERVER_MODE then
         defines { "YGOPRO_USE_AUDIO" }
         if AUDIO_LIB == "miniaudio" then
             defines { "YGOPRO_USE_MINIAUDIO" }
-            includedirs { "../miniaudio" }
+            includedirs { MINIAUDIO_INCLUDE_DIR }
             links { "miniaudio" }
             if MINIAUDIO_SUPPORT_OPUS_VORBIS then
                 defines { "YGOPRO_MINIAUDIO_SUPPORT_OPUS_VORBIS" }
-                includedirs { "../miniaudio/extras/decoders/libopus", "../miniaudio/extras/decoders/libvorbis" }
+                includedirs { MINIAUDIO_OPUS_INCLUDE_DIR, MINIAUDIO_VORBIS_INCLUDE_DIR }
                 if not MINIAUDIO_BUILD_OPUS_VORBIS then
                     links { "opusfile", "vorbisfile", "opus", "vorbis", "ogg" }
                     libdirs { OPUS_LIB_DIR, OPUSFILE_LIB_DIR, VORBIS_LIB_DIR, OGG_LIB_DIR }
