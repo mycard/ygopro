@@ -15,13 +15,13 @@ project "ygopro"
             "netserver.cpp", "netserver.h",
             "single_duel.cpp", "single_duel.h",
             "tag_duel.cpp", "tag_duel.h" }
-    includedirs { "../ocgcore" }
+    includedirs { "../ocgcore", EVENT_INCLUDE_DIR, SQLITE_INCLUDE_DIR }
     links { "ocgcore", "clzma", LUA_LIB_NAME, "sqlite3", "event" }
     if SERVER_ZIP_SUPPORT then
         defines { "SERVER_ZIP_SUPPORT" }
         links { "irrlicht" }
         if BUILD_IRRLICHT then
-            includedirs { "../irrlicht/source/Irrlicht" }
+            includedirs { IRRLICHT_INCLUDE_DIR }
         end
     end
     if SERVER_PRO2_SUPPORT then

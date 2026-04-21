@@ -57,7 +57,7 @@ jobs:
       id: premake
       uses: mercury233/action-cache-download-file@v1.1.0
       with:
-        url: https://github.com/premake/premake-core/releases/download/v5.0.0-beta6/premake-5.0.0-beta6-windows.zip
+        url: https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-windows.zip
         filename: premake5.zip
 
     - name: Extract premake
@@ -68,30 +68,30 @@ jobs:
       id: libevent
       uses: mercury233/action-cache-download-file@v1.1.0
       with:
-        url: https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz
+        url: https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz
         filename: libevent.tar.gz
 
     - name: Extract libevent
       run: |
         tar xf ${{ steps.libevent.outputs.filepath }}
-        move libevent-2.0.22-stable event
+        move libevent-2.1.12-stable event
 
     - name: Download lua
       id: lua
       uses: mercury233/action-cache-download-file@v1.1.0
       with:
-        url: https://www.lua.org/ftp/lua-5.4.7.tar.gz
+        url: https://www.lua.org/ftp/lua-5.4.8.tar.gz
 
     - name: Extract lua
       run: |
         tar xf ${{ steps.lua.outputs.filepath }}
-        move lua-5.4.7 lua
+        move lua-5.4.8 lua
 
     - name: Download sqlite
       id: sqlite
       uses: mercury233/action-cache-download-file@v1.1.0
       with:
-        url: https://www.sqlite.org/2025/sqlite-amalgamation-3490100.zip
+        url: https://www.sqlite.org/2026/sqlite-amalgamation-3510300.zip
 
     - name: Extract sqlite
       run: |
@@ -102,6 +102,12 @@ jobs:
       if: matrix.ygopro2 == true
       run: |
         git clone --depth=1 https://github.com/mercury233/irrlicht
+
+    - name: Configure libevent
+      shell: bash
+      run: |
+        cp premake/event/msvc-event-config.h event/include/event2/event-config.h
+        cp event/WIN32-Code/nmake/evconfig-private.h event/include/evconfig-private.h
 
     - name: Copy premake files
       run: |
@@ -143,7 +149,7 @@ jobs:
             premake-version: 5.0.0-beta4
           - name: ubuntu-24
             os: ubuntu-24.04
-            premake-version: 5.0.0-beta6
+            premake-version: 5.0.0-beta8
           - name: ubuntu-static-link
             os: ubuntu-22.04
             premake-version: 5.0.0-beta4
@@ -217,19 +223,19 @@ jobs:
       id: lua
       uses: mercury233/action-cache-download-file@v1.1.0
       with:
-        url: https://www.lua.org/ftp/lua-5.4.7.tar.gz
+        url: https://www.lua.org/ftp/lua-5.4.8.tar.gz
 
     - name: Extract lua
       run: |
         tar xf ${{ steps.lua.outputs.filepath }}
-        mv lua-5.4.7 lua
+        mv lua-5.4.8 lua
 
     - name: Download sqlite
       if: matrix.static-link == true
       id: sqlite
       uses: mercury233/action-cache-download-file@v1.1.0
       with:
-        url: https://www.sqlite.org/2025/sqlite-amalgamation-3490100.zip
+        url: https://www.sqlite.org/2026/sqlite-amalgamation-3510300.zip
 
     - name: Extract sqlite
       if: matrix.static-link == true

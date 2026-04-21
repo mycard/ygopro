@@ -119,6 +119,8 @@ mat_windows:
 exec_windows:
   extends: .exec_windows
   script:
+    - copy premake\event\msvc-event-config.h event\include\event2\event-config.h
+    - copy event\WIN32-Code\nmake\evconfig-private.h event\include\evconfig-private.h
     - '.\premake5.exe vs2026 --server-zip-support'
     - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.slnx /m /p:Configuration=Release /p:Platform=x64'
     - mkdir dist
