@@ -65,7 +65,8 @@ bool NetServer::IsCanIncreaseTime(unsigned short gameMsg, void *pdata, unsigned 
 			return true;
 	}
 }
-
+#endif //YGOPRO_SERVER_MODE
+#ifdef YGOPRO_SERVER_MODE
 unsigned short NetServer::StartServer(unsigned short port) {
 #else
 bool NetServer::StartServer(unsigned short port) {
@@ -104,6 +105,7 @@ bool NetServer::StartServer(unsigned short port) {
 	return true;
 #endif //YGOPRO_SERVER_MODE
 }
+#ifndef YGOPRO_SERVER_MODE
 bool NetServer::StartBroadcast() {
 	if(!net_evbase)
 		return false;
@@ -124,6 +126,7 @@ bool NetServer::StartBroadcast() {
 	event_add(broadcast_ev, nullptr);
 	return true;
 }
+#endif //YGOPRO_SERVER_MODE
 void NetServer::StopServer() {
 	if(!net_evbase)
 		return;
@@ -136,6 +139,7 @@ void NetServer::StopServer() {
 	event_base_loopexit(net_evbase, 0);
 #endif
 }
+#ifndef YGOPRO_SERVER_MODE
 void NetServer::StopBroadcast() {
 	if(!net_evbase || !broadcast_ev)
 		return;
@@ -146,10 +150,14 @@ void NetServer::StopBroadcast() {
 	event_free(broadcast_ev);
 	broadcast_ev = 0;
 }
+#endif //YGOPRO_SERVER_MODE
 void NetServer::StopListen() {
 	evconnlistener_disable(listener);
+#ifndef YGOPRO_SERVER_MODE
 	StopBroadcast();
+#endif
 }
+#ifndef YGOPRO_SERVER_MODE
 void NetServer::BroadcastEvent(evutil_socket_t fd, short events, void* arg) {
 	sockaddr_in bc_addr;
 	socklen_t sz = sizeof(sockaddr_in);
@@ -174,6 +182,7 @@ void NetServer::BroadcastEvent(evutil_socket_t fd, short events, void* arg) {
 		sendto(fd, (const char*)&hp, sizeof(HostPacket), 0, (sockaddr*)&sockTo, sizeof(sockTo));
 	}
 }
+#endif //YGOPRO_SERVER_MODE
 void NetServer::ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx) {
 	bufferevent* bev = bufferevent_socket_new(net_evbase, fd, BEV_OPT_CLOSE_ON_FREE);
 	DuelPlayer dp;
@@ -384,7 +393,9 @@ void NetServer::HandleCTOSPacket(DuelPlayer* dp, unsigned char* data, int len) {
 		BufferIO::CopyCharArray(pkt->name, duel_mode->name);
 		BufferIO::CopyCharArray(pkt->pass, duel_mode->pass);
 		duel_mode->JoinGame(dp, 0, true);
+#ifndef YGOPRO_SERVER_MODE
 		StartBroadcast();
+#endif
 		break;
 	}
 	case CTOS_JOIN_GAME: {
