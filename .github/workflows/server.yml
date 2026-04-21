@@ -96,7 +96,7 @@ jobs:
     - name: Extract sqlite
       run: |
         7z x ${{ steps.sqlite.outputs.filepath }}
-        move sqlite-amalgamation-3490100 sqlite3
+        move sqlite-amalgamation-3510300 sqlite3
 
     - name: Download irrlicht
       if: matrix.ygopro2 == true
@@ -241,7 +241,7 @@ jobs:
       if: matrix.static-link == true
       run: |
         7z x ${{ steps.sqlite.outputs.filepath }}
-        mv sqlite-amalgamation-3490100 sqlite3
+        mv sqlite-amalgamation-3510300 sqlite3
 
     - name: Download irrlicht
       if: matrix.zip-support == true
