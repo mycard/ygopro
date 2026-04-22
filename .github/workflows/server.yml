@@ -246,7 +246,7 @@ jobs:
     - name: Download irrlicht
       if: matrix.zip-support == true
       run: |
-        git clone --depth=1 https://github.com/mercury233/irrlicht
+        git clone --depth=1 -b main https://github.com/mercury233/irrlicht
 
     - name: Copy premake files
       run: |
