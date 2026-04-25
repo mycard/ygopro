@@ -171,6 +171,7 @@ exec_linux:
     #- mat_linux
     - mat_submodules
   script:
+    - apt update; apt -y install nasm
     - ./.ci/configure-audio.sh
     - premake5 gmake
     - cd build
