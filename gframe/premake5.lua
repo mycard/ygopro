@@ -7,7 +7,7 @@ project "YGOPro"
 
     defines { "_IRR_STATIC_LIB_" }
     files { "*.cpp", "*.h" }
-    includedirs { "../ocgcore", EVENT_INCLUDE_DIR, IRRLICHT_INCLUDE_DIR, JPEG_INCLUDE_DIR, LZMA_INCLUDE_DIR, ZLIB_INCLUDE_DIR, SQLITE_INCLUDE_DIR }
+    includedirs { "../ocgcore", EVENT_INCLUDE_DIR, IRRLICHT_INCLUDE_DIR, JPEG_INCLUDE_DIR, ZLIB_INCLUDE_DIR, LZMA_INCLUDE_DIR, SQLITE_INCLUDE_DIR }
     links { "ocgcore", "lzma", "sqlite3", "irrlicht", "png", "freetype", "event" }
 
     if BUILD_LUA then
