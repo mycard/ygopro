@@ -143,7 +143,6 @@ exec_windows:
     - copy bin\release\x64\ygopro.exe .
   artifacts:
     paths:
-      - build/
       - ygopro.exe
 
 .exec_unix:

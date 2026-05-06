@@ -142,7 +142,7 @@ newoption { trigger = "use-openmp", category = "YGOPro", description = "Enable O
 newoption { trigger = "use-simd", category = "YGOPro", description = "", value = "none, sse2, avx2, neon, best", default = "best" }
 
 function GetParam(param)
-    return _OPTIONS[param] or os.getenv(string.upper(string.gsub(param,"-","_")))
+    return os.getenv(string.upper(string.gsub(param,"-","_"))) or _OPTIONS[param]
 end
 
 function FindHeaderWithSubDir(header, subdir)
