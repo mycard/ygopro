@@ -132,6 +132,8 @@ newoption { trigger = "no-build-lzma", category = "YGOPro - lzma", description =
 newoption { trigger = "lzma-include-dir", category = "YGOPro - lzma", description = "", value = "PATH" }
 newoption { trigger = "lzma-lib-dir", category = "YGOPro - lzma", description = "", value = "PATH" }
 
+newoption { trigger = "vs2026-win7-support", category = "YGOPro", description = "Enable Windows 7 support (toolset v143) for Visual Studio 2026" }
+
 newoption { trigger = "mac-arm", category = "YGOPro", description = "Cross Compile for Apple Silicon Mac" }
 newoption { trigger = "mac-intel", category = "YGOPro", description = "Cross Compile for Intel Mac" }
 
@@ -310,6 +312,10 @@ if USE_SIMD == "avx2" or USE_SIMD == "neon" then
     USE_SIMD = "best"
 end
 
+if os.istarget("windows") and GetParam("vs2026-win7-support") then
+    WIN7_SUPPORT = true
+end
+
 if os.istarget("macosx") then
     if GetParam("mac-arm") then
         MAC_ARM = true
@@ -338,8 +344,10 @@ workspace "YGOPro"
         startproject "YGOPro"
         defines { "WINVER=0x0601" } -- WIN7
 
-    filter { "system:windows", "action:vs2026" }
-        toolset "v143"
+    if WIN7_SUPPORT then
+        filter { "system:windows", "action:vs2026" }
+            toolset "v143"
+    end
 
     filter { "system:windows", "action:vs*" }
         platforms { "Win32", "x64", "ARM64" }
