@@ -128,6 +128,7 @@ exec_windows:
     - vs
   variables:
     USE_SIMD: 'sse2'
+    VS2026_WIN7_SUPPORT: '1'
   dependencies:
     - mat_common
     - mat_windows
