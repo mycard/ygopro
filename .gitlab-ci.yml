@@ -256,6 +256,8 @@ assets:
     # pack
     - git clone --depth=1 https://code.moenext.com/mycard/ygopro-card-list
     - mv ygopro-card-list/pack .
+    # load-once.conf
+    - cp ./resource/load-once.conf .
   artifacts:
     paths:
       - deck
@@ -263,6 +265,7 @@ assets:
       - sound
       - fonts
       - pack
+      - load-once.conf
   only:
     - tags
     - gitlabci
