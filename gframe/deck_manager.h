@@ -22,6 +22,12 @@
 #define YGOPRO_MAX_SIDE					15
 #endif
 
+namespace irr {
+	namespace io {
+		class IReadFile;
+	}
+}
+
 namespace ygo {
 
 constexpr int DECK_MAX_SIZE = YGOPRO_MAX_DECK;

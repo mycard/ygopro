@@ -57,24 +57,24 @@ struct Config {
 	bool use_d3d{ false };
 	bool use_image_scale_multi_thread{ false };
 	bool use_image_load_background_thread{ false };
-	unsigned short antialias{ 0 };
+	unsigned short antialias{ 2 };
 	unsigned int enable_log{ 0x3 };
 	unsigned short serverport{ 7911 };
 	unsigned char textfontsize{ 14 };
 	wchar_t lasthost[100]{};
 	wchar_t lastport[10]{};
-	wchar_t nickname[20]{};
-	wchar_t gamename[20]{};
+	wchar_t nickname[20]{ L"Player" };
+	wchar_t gamename[20]{ L"Game" };
 	wchar_t roompass[20]{};
 	//path
 	wchar_t lastcategory[256]{};
 	wchar_t lastdeck[256]{};
 	char textfont[256]{};
 	char numfont[256]{};
-	wchar_t bot_deck_path[256]{};
+	wchar_t bot_deck_path[256]{ L"./botdeck" };
 	//settings
 	int chkMAutoPos{ 0 };
-	int chkSTAutoPos{ 1 };
+	int chkSTAutoPos{ 0 };
 	int chkRandomPos{ 0 };
 	int chkAutoChain{ 0 };
 	int chkWaitChain{ 0 };
@@ -101,13 +101,15 @@ struct Config {
 	int prefer_expansion_script{ 0 };
 	bool enable_sound{ true };
 	bool enable_music{ true };
-	double sound_volume{ 0.5 };
-	double music_volume{ 0.5 };
+	int sound_volume{ 50 };
+	int music_volume{ 50 };
 	int music_mode{ 1 };
 	bool window_maximized{ false };
 	int window_width{ GAME_WINDOW_WIDTH };
 	int window_height{ GAME_WINDOW_HEIGHT };
-	bool resize_popup_menu{ false };
+	int resize_popup_menu{ 0 };
+	bool resize_select_window{ true };
+	bool swap_yes_no_button{ false };
 };
 
 struct DuelInfo {
@@ -205,7 +207,7 @@ public:
 	void WaitFrameSignal(int frame);
 	void DrawThumb(const CardDataC* cp, irr::core::vector2di pos, const LFList* lflist, bool drag = false);
 	void DrawDeckBd();
-	void LoadConfig();
+	void LoadConfig(const char* file);
 	void SaveConfig();
 	void ShowCardInfo(int code, bool resize = false);
 	void ClearCardInfo(int player = 0);
@@ -224,6 +226,23 @@ public:
 	int ChatLocalPlayer(int player);
 	const wchar_t* LocalName(int local_player);
 
+	irr::s32 GetPopupMenuButtonWidth() const {
+		if(gameConf.resize_popup_menu > 0) {
+			return (xScale >= 0.7f) ? 100 * xScale : 70;
+		} else {
+			return 100;
+		}
+	}
+
+	irr::s32 GetPopupMenuButtonHeight() const {
+		if(gameConf.resize_popup_menu > 0) {
+			float yScaleForMenu = yScale * (1 + (gameConf.resize_popup_menu - 1) * 0.33f);
+			return (yScaleForMenu >= 0.7f) ? 24 * yScaleForMenu : 16;
+		} else {
+			return 24;
+		}
+	}
+
 	bool HasFocus(irr::gui::EGUI_ELEMENT_TYPE type) const {
 		irr::gui::IGUIElement* focus = env->getFocus();
 		return focus && focus->hasType(type);
@@ -235,8 +254,11 @@ public:
 		editbox->setText(text.c_str());
 	}
 
+	void SwapYesNoButtons(bool no_first);
+
 	void OnResize(); // caller must hold gMutex
 	void ResizeChatInputWindow();
+	void ResizeCmdMenu();
 	void ResizePosSelectButtons();
 	void ResizeCardSelectButtons(irr::gui::IGUIWindow* window, irr::gui::IGUIStaticText** labels, irr::gui::IGUIButton** images,
 		irr::gui::IGUIScrollBar* scrollbar, irr::gui::IGUIButton* buttonOK, const std::vector<ClientCard*>& cards);
@@ -381,6 +403,7 @@ public:
 	irr::gui::IGUICheckBox* chkAutoSearch{};
 	irr::gui::IGUICheckBox* chkMultiKeywords{};
 	irr::gui::IGUICheckBox* chkPreferExpansionScript{};
+	irr::gui::IGUICheckBox* chkSwapYesNoButton{};
 	irr::gui::IGUICheckBox* chkLFlist{};
 	irr::gui::IGUIComboBox* cbLFlist{};
 	irr::gui::IGUICheckBox* chkEnableSound{};
@@ -388,6 +411,9 @@ public:
 	irr::gui::IGUIScrollBar* scrSoundVolume{};
 	irr::gui::IGUIScrollBar* scrMusicVolume{};
 	irr::gui::IGUICheckBox* chkMusicMode{};
+	irr::gui::IGUICheckBox* chkResizeSelectWindow{};
+	irr::gui::IGUICheckBox* chkResizePopupMenu{};
+	irr::gui::IGUIScrollBar* scrResizePopupMenu{};
 	irr::gui::IGUIButton* btnWinResizeS{};
 	irr::gui::IGUIButton* btnWinResizeM{};
 	irr::gui::IGUIButton* btnWinResizeL{};
@@ -891,6 +917,10 @@ extern uint8_t pre_seed_specified[MAX_MATCH_COUNT];
 #define BUTTON_BIG_CARD_ZOOM_IN		381
 #define BUTTON_BIG_CARD_ZOOM_OUT	382
 #define BUTTON_BIG_CARD_ORIG_SIZE	383
+#define CHECKBOX_RESIZE_POPUP_MENU	384
+#define SCROLL_RESIZE_POPUP_MENU	385
+#define CHECKBOX_RESIZE_SELECT_WINDOW	386
+#define CHECKBOX_SWAP_YES_NO_BUTTON	387
 
 #define AVAIL_OCG					0x1
 #define AVAIL_TCG					0x2

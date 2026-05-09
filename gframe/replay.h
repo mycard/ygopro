@@ -19,10 +19,6 @@ namespace ygo {
 #define REPLAY_ID_YRP1	0x31707279
 #define REPLAY_ID_YRP2	0x32707279
 
-// max size
-constexpr int MAX_REPLAY_SIZE = 0x80000;
-constexpr int MAX_COMP_SIZE = UINT16_MAX + 1;
-
 #ifdef YGOPRO_SERVER_MODE
 #define REPLAY_MODE_SAVE_IN_SERVER		0x1
 #define REPLAY_MODE_WATCHER_NO_SEND		0x2
@@ -54,6 +50,10 @@ struct DuelParameters {
 	int32_t draw_count{};
 	uint32_t duel_flag{};
 };
+
+// max size
+constexpr int MAX_REPLAY_SIZE = 0x80000;
+constexpr int MAX_COMP_SIZE = UINT16_MAX - 1 - sizeof(ExtendedReplayHeader); // UINT16_MAX - 1 = MAX_DATA_SIZE;
 
 class Replay {
 public:
