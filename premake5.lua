@@ -537,16 +537,22 @@ workspace "YGOPro"
     if BUILD_EVENT then
         include "event"
     end
-    if BUILD_FREETYPE and not SERVER_MODE then
-        include "freetype"
-    end
-    if BUILD_IRRLICHT and not SERVER_MODE then
-        include "irrlicht"
-    end
-    if BUILD_IRRLICHT and SERVER_MODE and SERVER_ZIP_SUPPORT then
+if SERVER_MODE then
+    if BUILD_IRRLICHT and SERVER_ZIP_SUPPORT then
+        -- use zlib bundled with Irrlicht
         include "irrlicht/premake5-only-zipreader.lua"
     end
-    if BUILD_JPEG and not SERVER_MODE then
+    if BUILD_SQLITE then
+        include "sqlite3"
+    end
+else
+    if BUILD_FREETYPE then
+        include "freetype"
+    end
+    if BUILD_IRRLICHT then
+        include "irrlicht"
+    end
+    if BUILD_JPEG then
         include "jpeg"
     end
     if BUILD_PNG then
@@ -558,8 +564,9 @@ workspace "YGOPro"
     if BUILD_SQLITE then
         include "sqlite3"
     end
-    if USE_AUDIO and not SERVER_MODE then
+    if USE_AUDIO then
         if AUDIO_LIB=="miniaudio" then
             include "miniaudio"
         end
     end
+end
