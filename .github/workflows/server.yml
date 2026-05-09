@@ -284,7 +284,7 @@ jobs:
         merge-multiple: true
 
     - name: GitHub Release
-      uses: salix5/action-automatic-releases@e0545bc14e9677f38aa573f1a52563022f987356
+      uses: mercury233/action-automatic-releases@cede8e280e06bec07167beaa866ef90277d68303
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: "server-latest"
