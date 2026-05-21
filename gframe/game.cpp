@@ -211,15 +211,7 @@ bool Game::Initialize() {
 	env->addStaticText(L"不要觉得会有别人报告，别人也会这么想。", irr::core::rect<irr::s32>(10, 260, 270, 280), false, false, wMainMenu);
 
 	env->addStaticText(L"目前测试的内容：\n\n\
-超量召唤中断线重连不再崩溃。\n\
-升级编译环境和依赖库。\n\
-升级图形引擎Irrlicht到1.9。\n\
-支持左右互换「是/否」按钮位置。\n\
-支持多倍放大弹出菜单。\n\
-优化卡图的画质和加载速度。\n\
-优化锁帧处理。\n\
-选择卡片对话框随窗口缩放。\n\
-宣言卡名时可按字段查询。\n\
+升级依赖库。\n\
 ", irr::core::rect<irr::s32>(300, 30, 550, 390), false, true, wMainMenu);
 
 	//lan mode
