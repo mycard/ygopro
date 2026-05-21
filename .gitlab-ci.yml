@@ -26,6 +26,20 @@ mat_common:
     # event
     - wget -O - https://mat-cacher.moenext.com/https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz | tar zfx -
     - mv libevent-2.1.12-stable event
+    # jpeg
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.4.1/libjpeg-turbo-3.1.4.1.tar.gz | tar zfx -
+    - mv libjpeg-turbo-3.1.4.1 jpeg
+    - cp jpeg/src/jversion.h.in jpeg/src/jversion.h
+    # libpng
+    - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/libpng/libpng-1.6.58.tar.gz | tar zfx -
+    - mv libpng-1.6.58 png
+    - cp png/scripts/pnglibconf.h.prebuilt png/pnglibconf.h
+    # zlib
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.gz | tar zfx -
+    - mv zlib-1.3.2 zlib
+    # lzma
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz | tar zfx -
+    - mv xz-5.8.3 lzma
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
     # miniaudio
@@ -38,6 +52,10 @@ mat_common:
       - freetype
       - sqlite3
       - event
+      - jpeg
+      - png
+      - zlib
+      - lzma
       - irrlicht
       - miniaudio
 
@@ -76,7 +94,7 @@ mat_macos:
   tags:
     - linux
   script:
-    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-macosx.tar.gz | tar zfx -
     - chmod +x premake5
   artifacts:
     paths:
@@ -88,11 +106,16 @@ mat_windows:
     - linux
   script:
     # premake5.exe
-    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta7-windows.zip
-    - 7z x -y premake-5.0.0-beta7-windows.zip
+    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-windows.zip
+    - 7z x -y premake-5.0.0-beta8-windows.zip
+    # nasm.exe
+    - wget https://mat-cacher.moenext.com/https://www.nasm.us/pub/nasm/releasebuilds/3.01/win64/nasm-3.01-win64.zip
+    - 7z x -y nasm-3.01-win64.zip
+    - cp nasm-3.01/nasm.exe .
   artifacts:
     paths:
       - premake5.exe
+      - nasm.exe
 
 ._exec_build:
   stage: build
@@ -103,20 +126,24 @@ exec_windows:
   extends: ._exec_build
   tags:
     - vs
+  variables:
+    USE_SIMD: 'sse2'
+    VS2026_WIN7_SUPPORT: '1'
   dependencies:
     - mat_common
     - mat_windows
     - mat_submodules
   script:
     - bash -c 'cp -rf premake/* . ; cp -rf resource/* .'
-    - '.\premake5.exe vs2019'
-    - cmd /c '"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.sln /m /p:Configuration=Release /p:Platform=x64'
+    - bash -c 'cp event/msvc-event-config.h event/include/event2/event-config.h' # TODO: prepare-event.bat ?
+    - bash -c 'cp event/WIN32-Code/nmake/evconfig-private.h event/include/evconfig-private.h'
+    - copy nasm.exe C:\Windows\
+    - '.\premake5.exe vs2026'
+    - cmd /c '"C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\msbuild.exe" build\YGOPro.slnx /m /p:Configuration=Release /p:Platform=x64'
     - copy bin\release\x64\ygopro.exe .
-    - copy C:\Windows\System32\vcomp140.dll .
   artifacts:
     paths:
       - ygopro.exe
-      - vcomp140.dll
 
 .exec_unix:
   extends: ._exec_build
@@ -128,7 +155,10 @@ exec_windows:
     BUILD_OPUS_VORBIS: '1'
     AUDIO_LIB: 'miniaudio'
     MINIAUDIO_SUPPORT_OPUS_VORBIS: '1'
-    BUILD_JPEG_PNG: '1'
+    BUILD_JPEG: '1'
+    BUILD_PNG: '1'
+    BUILD_ZLIB: '1'
+    BUILD_LZMA: '1'
   before_script:
     - ./.ci/configure-libevent.sh
 
@@ -142,8 +172,9 @@ exec_linux:
     #- mat_linux
     - mat_submodules
   script:
+    - apt update; apt -y install nasm
     - ./.ci/configure-audio.sh
-    - premake5 gmake --build-freetype --build-sqlite
+    - premake5 gmake
     - cd build
     - make config=release -j$(nproc)
     - cd ..
@@ -225,6 +256,8 @@ assets:
     # pack
     - git clone --depth=1 https://code.moenext.com/mycard/ygopro-card-list
     - mv ygopro-card-list/pack .
+    # load-once.conf
+    - cp ./resource/load-once.conf .
   artifacts:
     paths:
       - deck
@@ -232,6 +265,7 @@ assets:
       - sound
       - fonts
       - pack
+      - load-once.conf
   only:
     - tags
     - gitlabci
