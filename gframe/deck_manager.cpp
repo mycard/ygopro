@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "deck_manager.h"
+#include "data_manager.h"
 #include "game.h"
 #include "myfilesystem.h"
 #include "network.h"
@@ -199,7 +200,7 @@ uint32_t DeckManager::LoadDeckFromStream(Deck& deck, std::istringstream& deckStr
 	uint32_t cardlist[PACK_MAX_SIZE]{};
 	bool is_side = false;
 	std::string linebuf;
-	while (std::getline(deckStream, linebuf, '\n') && ct < PACK_MAX_SIZE) {
+	while (std::getline(deckStream, linebuf) && ct < PACK_MAX_SIZE) {
 		if (linebuf[0] == '!') {
 			is_side = true;
 			continue;

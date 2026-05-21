@@ -2358,19 +2358,8 @@ void Game::SetWindowsIcon() {
 #endif
 }
 void Game::SetWindowsScale(float scale) {
-#ifdef _WIN32
-	WINDOWPLACEMENT plc;
-	plc.length = sizeof(WINDOWPLACEMENT);
-	if(GetWindowPlacement(hWnd, &plc) && (plc.showCmd == SW_SHOWMAXIMIZED))
-		ShowWindow(hWnd, SW_RESTORE);
-	RECT rcWindow, rcClient;
-	GetWindowRect(hWnd, &rcWindow);
-	GetClientRect(hWnd, &rcClient);
-	MoveWindow(hWnd, rcWindow.left, rcWindow.top,
-		(rcWindow.right - rcWindow.left) - rcClient.right + GAME_WINDOW_WIDTH * scale,
-		(rcWindow.bottom - rcWindow.top) - rcClient.bottom + GAME_WINDOW_HEIGHT * scale,
-		true);
-#endif
+	device->restoreWindow();
+	device->setWindowSize(irr::core::dimension2du(GAME_WINDOW_WIDTH * scale, GAME_WINDOW_HEIGHT * scale));
 }
 void Game::FlashWindow() {
 #ifdef _WIN32
