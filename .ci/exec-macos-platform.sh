@@ -9,7 +9,9 @@ TARGET_YGOPRO_BINARY_PATH=./ygopro-platforms/ygopro-platform-$TARGET_PLATFORM
 
 rm -rf sqlite3/VERSION sqlite3/version
 
-./premake5 gmake --cc=clang
+brew install nasm
+
+./premake5 gmake
 
 cd build
 make config=release -j$(sysctl -n hw.ncpu)
