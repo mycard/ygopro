@@ -165,7 +165,7 @@ exec_windows:
 exec_linux:
   extends: .exec_unix
   tags:
-    - avx2
+    - linux
   image: git-registry.moenext.com/mycard/docker-ygopro-builder:latest
   dependencies:
     - mat_common
