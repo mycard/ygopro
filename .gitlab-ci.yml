@@ -182,7 +182,7 @@ exec_windows:
 exec_linux:
   extends: .exec_linux
   tags:
-    - noavx2
+    - linux
 
 
 exec_debian:
