@@ -1,7 +1,7 @@
 project "irrlicht"
     kind "StaticLib"
 
-    includedirs { "include", "source/Irrlicht", "source/Irrlicht/zlib" }
+    includedirs { "include", "source/Irrlicht" }
 
     defines {
         "_IRR_STATIC_LIB_",
@@ -20,12 +20,6 @@ project "irrlicht"
 
     files { 
         "source/Irrlicht/os.cpp",
-        "source/Irrlicht/zlib/adler32.c",
-        "source/Irrlicht/zlib/crc32.c",
-        "source/Irrlicht/zlib/inffast.c",
-        "source/Irrlicht/zlib/inflate.c",
-        "source/Irrlicht/zlib/inftrees.c",
-        "source/Irrlicht/zlib/zutil.c",
         "source/Irrlicht/CAttributes.cpp",
         "source/Irrlicht/CFileList.cpp",
         "source/Irrlicht/CFileSystem.cpp",

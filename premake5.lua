@@ -575,8 +575,10 @@ workspace "YGOPro"
     end
 if SERVER_MODE then
     if BUILD_IRRLICHT and SERVER_ZIP_SUPPORT then
-        -- use zlib bundled with Irrlicht
         include "irrlicht/premake5-only-zipreader.lua"
+    end
+    if BUILD_ZLIB and SERVER_ZIP_SUPPORT then
+        include "zlib"
     end
     if BUILD_SQLITE then
         include "sqlite3"
