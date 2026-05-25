@@ -21,6 +21,12 @@ project "ygopro"
         if BUILD_IRRLICHT then
             includedirs { IRRLICHT_INCLUDE_DIR, IRRLICHT_SOURCE_DIR }
         end
+        if BUILD_ZLIB then
+            includedirs { ZLIB_INCLUDE_DIR }
+        else
+            links { ZLIB_LIB_NAME }
+            libdirs { ZLIB_LIB_DIR }
+        end
     end
     if SERVER_PRO2_SUPPORT then
         defines { "SERVER_PRO2_SUPPORT" }
