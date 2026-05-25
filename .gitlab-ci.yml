@@ -27,6 +27,12 @@ mat_common:
     - mv libevent-2.1.12-stable event
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
+    # lzma
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz | tar zfx -
+    - mv xz-5.8.3 lzma
+    # zlib
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.gz | tar zfx -
+    - mv zlib-1.3.2 zlib
     # miniaudio
     #- ./.ci/prepare-miniaudio.sh
     # premake
@@ -38,6 +44,8 @@ mat_common:
       - sqlite3
       - event
       - irrlicht
+      - lzma
+      - zlib
       #- miniaudio
 
 mat_submodules:
@@ -163,6 +171,8 @@ exec_windows:
   extends: .exec_linux_common
   variables:
     BUILD_SQLITE: '1'
+    BUILD_LZMA: '1'
+    BUILD_ZLIB: '1'
     SERVER_ZIP_SUPPORT: '1'
     RELEASE_DIR: linux-x64
 
@@ -172,7 +182,7 @@ exec_windows:
     LUA_DEB: '1'
     RELEASE_DIR: debian-x64
   before_script:
-    - apt update; apt -y install git build-essential liblua5.4-dev libsqlite3-dev libevent-dev
+    - apt update; apt -y install git build-essential liblua5.4-dev libsqlite3-dev libevent-dev liblzma-dev zlib1g-dev
 
 .use_arm:
   image: git-registry.moenext.com/mycard/docker-ygopro-builder:fpic
@@ -199,6 +209,7 @@ exec_debian:
     PREMAKE5_BIN: ./premake5
     BUILD_SQLITE: '1'
     BUILD_EVENT: '1'
+    BUILD_LZMA: '1'
     SERVER_ZIP_SUPPORT: '1'
   before_script:
     - rm -rf sqlite3/VERSION sqlite3/version
