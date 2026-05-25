@@ -101,9 +101,13 @@ void Replay::EndRecord() {
 	opt.pb = 2;
 	opt.nice_len = 32;
 	opt.mf = LZMA_MF_BT4;
-	opt.ext_flags = 0;
 	lzma_filter filters[2];
+#ifdef LZMA_FILTER_LZMA1EXT
+	opt.ext_flags = 0;
 	filters[0].id = LZMA_FILTER_LZMA1EXT;
+#else
+	filters[0].id = LZMA_FILTER_LZMA1;
+#endif
 	filters[0].options = &opt;
 	filters[1].id = LZMA_VLI_UNKNOWN;
 	filters[1].options = nullptr;
