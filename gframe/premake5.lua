@@ -1,5 +1,3 @@
-include "lzma/."
-
 if SERVER_MODE then
 project "ygopro"
     kind "ConsoleApp"
@@ -40,8 +38,8 @@ project "YGOPro"
 
     defines { "_IRR_STATIC_LIB_" }
     files { "*.cpp", "*.h" }
-    includedirs { "../ocgcore", EVENT_INCLUDE_DIR, IRRLICHT_INCLUDE_DIR, JPEG_INCLUDE_DIR, ZLIB_INCLUDE_DIR, SQLITE_INCLUDE_DIR }
-    links { "ocgcore", "clzma", "sqlite3", "irrlicht", "png", "freetype", "event" }
+    includedirs { "../ocgcore", EVENT_INCLUDE_DIR, IRRLICHT_INCLUDE_DIR, JPEG_INCLUDE_DIR, ZLIB_INCLUDE_DIR, LZMA_INCLUDE_DIR, SQLITE_INCLUDE_DIR }
+    links { "ocgcore", "lzma", "sqlite3", "irrlicht", "png", "freetype", "event" }
 end
 
     if BUILD_LUA then
@@ -89,6 +87,10 @@ end
 
     if not BUILD_SQLITE then
         libdirs { SQLITE_LIB_DIR }
+    end
+
+    if not BUILD_LZMA then
+        libdirs { LZMA_LIB_DIR }
     end
 
 if not SERVER_MODE then

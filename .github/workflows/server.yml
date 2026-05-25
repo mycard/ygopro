@@ -98,6 +98,18 @@ jobs:
         7z x ${{ steps.sqlite.outputs.filepath }}
         move sqlite-amalgamation-3510300 sqlite3
 
+    - name: Download lzma (xz)
+      id: lzma
+      uses: mercury233/action-cache-download-file@v1.2.0
+      with:
+        url: https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz
+        sha256: 3d3a1b973af218114f4f889bbaa2f4c037deaae0c8e815eec381c3d546b974a0
+
+    - name: Extract lzma
+      run: |
+        tar xf ${{ steps.lzma.outputs.filepath }}
+        move xz-5.8.3 lzma
+
     - name: Download irrlicht
       if: matrix.ygopro2 == true
       run: |
@@ -183,7 +195,7 @@ jobs:
       if: matrix.static-link != true
       run: |
         sudo apt-get update
-        sudo apt-get install -y libevent-dev libsqlite3-dev
+        sudo apt-get install -y libevent-dev libsqlite3-dev liblzma-dev
 
     - name: Download premake
       id: premake
