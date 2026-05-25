@@ -581,6 +581,9 @@ if SERVER_MODE then
     if BUILD_SQLITE then
         include "sqlite3"
     end
+    if BUILD_LZMA then
+        include "lzma/."
+    end
 else
     if BUILD_FREETYPE then
         include "freetype"
