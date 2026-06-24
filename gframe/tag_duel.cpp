@@ -2070,12 +2070,13 @@ void TagDuel::TimeConfirm(DuelPlayer* dp) {
 		return;
 	cur_player[last_response]->state = CTOS_RESPONSE;
 #ifdef YGOPRO_SERVER_MODE
-	if(time_elapsed < 10 && time_elapsed <= time_compensator[dp->type]){
-		time_compensator[dp->type] -= time_elapsed;
+	int resp_type = dp->type < 2 ? 0 : 1;
+	if(time_elapsed < 10 && time_elapsed <= time_compensator[resp_type]){
+		time_compensator[resp_type] -= time_elapsed;
 		time_elapsed = 0;
 	}
 	else {
-		time_limit[dp->type] -= time_elapsed;
+		time_limit[resp_type] -= time_elapsed;
 		time_elapsed = 0;
 	}
 #else
