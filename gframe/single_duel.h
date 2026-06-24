@@ -74,6 +74,7 @@ protected:
 	bool deck_reversed{ false };
 #endif
 	Replay last_replay;
+	size_t last_replay_response_size{ 0 };
 	bool match_mode{ false };
 	int match_kill{ 0 };
 	unsigned char duel_count{ 0 };
