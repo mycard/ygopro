@@ -33,6 +33,7 @@
 /miniaudio
 /png
 /sqlite3
+/lzma
 /zlib
 /gframe/*.ico
 /gframe/ygopro.rc
