@@ -174,6 +174,12 @@ void SingleDuel::JoinGame(DuelPlayer* dp, unsigned char* pdata, bool is_creater)
 	}
 }
 void SingleDuel::LeaveGame(DuelPlayer* dp) {
+#ifdef YGOPRO_SERVER_MODE
+	if(dp == cache_recorder || dp == replay_recorder) {
+		NetServer::DisconnectPlayer(dp);
+		return;
+	}
+#endif
 	if(dp == host_player) {
 #ifdef YGOPRO_SERVER_MODE
 		int host_pos;
@@ -1847,6 +1853,12 @@ void SingleDuel::EndDuel() {
 	pduel = 0;
 }
 void SingleDuel::OnPlayerDisconnected(DuelPlayer* dp) {
+#ifdef YGOPRO_SERVER_MODE
+	if(cache_recorder == dp)
+		cache_recorder = nullptr;
+	if(replay_recorder == dp)
+		replay_recorder = nullptr;
+#endif
 	if(host_player == dp)
 		host_player = nullptr;
 	for(int i = 0; i < 2; ++i) {
