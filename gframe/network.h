@@ -227,6 +227,7 @@ public:
 	virtual void RequestField(DuelPlayer* dp) = 0;
 #endif
 	virtual void EndDuel() = 0;
+	virtual void OnPlayerDisconnected(DuelPlayer* dp) = 0;
 
 public:
 	event* etimer { nullptr };

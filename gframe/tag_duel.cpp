@@ -12,15 +12,8 @@ namespace ygo {
 #ifdef YGOPRO_SERVER_MODE
 extern unsigned short replay_mode;
 #endif
-TagDuel::TagDuel() {
-	for(int i = 0; i < 4; ++i) {
-		players[i] = 0;
-		ready[i] = false;
-		surrender[i] = false;
-	}
-}
-TagDuel::~TagDuel() {
-}
+TagDuel::TagDuel() = default;
+TagDuel::~TagDuel() = default;
 void TagDuel::Chat(DuelPlayer* dp, unsigned char* pdata, int len) {
 	unsigned char scc[SIZE_STOC_CHAT];
 	const auto scc_size = NetServer::CreateChatPacket(pdata, len, scc, dp->type);
@@ -1941,6 +1934,24 @@ void TagDuel::EndDuel() {
 	event_del(etimer);
 	pduel = 0;
 }
+void TagDuel::OnPlayerDisconnected(DuelPlayer* dp) {
+	if(host_player == dp)
+		host_player = nullptr;
+	for(int i = 0; i < 4; ++i) {
+		if(players[i] == dp) {
+			players[i] = nullptr;
+			ready[i] = false;
+			surrender[i] = false;
+		}
+		if(pplayer[i] == dp)
+			pplayer[i] = nullptr;
+	}
+	for(int i = 0; i < 2; ++i) {
+		if(cur_player[i] == dp)
+			cur_player[i] = nullptr;
+	}
+	observers.erase(dp);
+}
 void TagDuel::WaitforResponse(int playerid) {
 	last_response = playerid;
 	unsigned char msg = MSG_WAITING;
@@ -2084,7 +2095,7 @@ void TagDuel::TimeConfirm(DuelPlayer* dp) {
 		time_elapsed = 0;
 #endif //YGOPRO_SERVER_MODE
 }
-inline int TagDuel::WriteUpdateData(int player, int location, unsigned int flag, unsigned char*& qbuf, int use_cache) {
+int TagDuel::WriteUpdateData(int player, int location, unsigned int flag, unsigned char*& qbuf, int use_cache) {
 	flag |= (QUERY_CODE | QUERY_POSITION);
 	BufferIO::Write<uint8_t>(qbuf, MSG_UPDATE_DATA);
 	BufferIO::Write<uint8_t>(qbuf, player);

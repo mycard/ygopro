@@ -32,6 +32,7 @@ public:
 	void RequestField(DuelPlayer* dp) override;
 #endif
 	void EndDuel() override;
+	void OnPlayerDisconnected(DuelPlayer* dp) override;
 	
 	void DuelEndProc();
 	void WaitforResponse(int playerid);
