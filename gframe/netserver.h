@@ -23,7 +23,7 @@ public:
 	static unsigned short StartServer(unsigned short port);
 	static void StopServer();
 	static void StopListen();
-	static bool IsCanIncreaseTime(unsigned short gameMsg, void *pdata, unsigned int len);
+	static bool IsCanIncreaseTime(unsigned short gameMsg, const void* pdata, unsigned int len);
 #else
 	static bool StartServer(unsigned short port);
 	static bool StartBroadcast();

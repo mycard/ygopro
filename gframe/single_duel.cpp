@@ -1950,7 +1950,7 @@ void SingleDuel::RequestField(DuelPlayer* dp) {
 			auto clen = BufferIO::Read<int32_t>(qbuf);
 			if(qbuf + clen - 4 == query_buffer + qlen) {
 				// last card
-				code = *(uint32_t*)(qbuf + 4);
+				std::memcpy(&code, qbuf + 4, sizeof code);
 				position = GetPosition(qbuf, 8);
 			}
 			qbuf += clen - 4;
