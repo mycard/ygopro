@@ -53,22 +53,22 @@ void NetServer::InitDuel()
 	}
 }
 
-bool NetServer::IsCanIncreaseTime(unsigned short gameMsg, void *pdata, unsigned int len) {
-	int32_t* ivalue = (int32_t*)pdata;
+bool NetServer::IsCanIncreaseTime(unsigned short gameMsg, const void* pdata, unsigned int len) {
+	if(gameMsg == MSG_RETRY || gameMsg == MSG_SELECT_UNSELECT_CARD)
+		return false;
+	if(gameMsg != MSG_SELECT_CHAIN && gameMsg != MSG_SELECT_IDLECMD && gameMsg != MSG_SELECT_BATTLECMD)
+		return true;
+	if(!pdata || len < sizeof(int32_t))
+		return false;
+	int32_t value{};
+	std::memcpy(&value, pdata, sizeof value);
 	switch(gameMsg) {
-		case MSG_RETRY:
-		case MSG_SELECT_UNSELECT_CARD:
-			return false;
 		case MSG_SELECT_CHAIN:
-			return ivalue[0] != -1;
-		case MSG_SELECT_IDLECMD: {
-			int32_t idleChoice = ivalue[0] & 0xffff;
-			return idleChoice <= 5; // no shuffle hand, enter other phases
-		}
-		case MSG_SELECT_BATTLECMD: {
-			int32_t battleChoice = ivalue[0] & 0xffff;
-			return battleChoice <= 1; // attack only
-		}
+			return value != -1;
+		case MSG_SELECT_IDLECMD:
+			return (value & 0xffff) <= 5; // no shuffle hand, enter other phases
+		case MSG_SELECT_BATTLECMD:
+			return (value & 0xffff) <= 1; // attack only
 		default:
 			return true;
 	}
