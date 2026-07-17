@@ -16,6 +16,7 @@ namespace{
 	event* broadcast_ev {};
 	evconnlistener* listener{};
 	DuelMode* duel_mode{};
+	bool broadcast_enabled{};
 	unsigned char net_server_read[SIZE_NETWORK_BUFFER]{};
 }
 
@@ -74,11 +75,7 @@ bool NetServer::IsCanIncreaseTime(unsigned short gameMsg, const void* pdata, uns
 	}
 }
 #endif //YGOPRO_SERVER_MODE
-#ifdef YGOPRO_SERVER_MODE
-unsigned short NetServer::StartServer(unsigned short port) {
-#else
-bool NetServer::StartServer(unsigned short port) {
-#endif //YGOPRO_SERVER_MODE
+bool NetServer::StartServer(unsigned short port, unsigned int ip, unsigned short* out_actual_port, bool enable_broadcast) {
 	if(net_evbase)
 		return false;
 	net_evbase = event_base_new();
@@ -86,13 +83,8 @@ bool NetServer::StartServer(unsigned short port) {
 		return false;
 	sockaddr_in sin;
 	std::memset(&sin, 0, sizeof sin);
-	server_port = port;
 	sin.sin_family = AF_INET;
-#ifdef SERVER_PRO2_SUPPORT
-	sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-#else
-	sin.sin_addr.s_addr = htonl(INADDR_ANY);
-#endif
+	sin.sin_addr.s_addr = htonl(ip);
 	sin.sin_port = htons(port);
 	listener = evconnlistener_new_bind(net_evbase, ServerAccept, nullptr,
 	                                   LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, -1, (sockaddr*)&sin, sizeof(sin));
@@ -101,21 +93,27 @@ bool NetServer::StartServer(unsigned short port) {
 		net_evbase = nullptr;
 		return false;
 	}
+	sockaddr_in bound_addr;
+	std::memset(&bound_addr, 0, sizeof bound_addr);
+	socklen_t bound_addr_len = sizeof bound_addr;
+	if(getsockname(evconnlistener_get_fd(listener), (sockaddr*)&bound_addr, &bound_addr_len) == SOCKET_ERROR) {
+		evconnlistener_free(listener);
+		listener = nullptr;
+		event_base_free(net_evbase);
+		net_evbase = nullptr;
+		return false;
+	}
+	server_port = ntohs(bound_addr.sin_port);
+	if(out_actual_port)
+		*out_actual_port = server_port;
+	broadcast_enabled = enable_broadcast;
 	evconnlistener_set_error_cb(listener, ServerAcceptError);
 	std::thread(ServerThread).detach();
-#ifdef YGOPRO_SERVER_MODE
-	evutil_socket_t fd = evconnlistener_get_fd(listener);
-	socklen_t addrlen = sizeof(sockaddr);
-	sockaddr_in addr;
-	getsockname(fd, (sockaddr*)&addr, &addrlen);
-	return ntohs(addr.sin_port);
-#else
 	return true;
-#endif //YGOPRO_SERVER_MODE
 }
 #ifndef YGOPRO_SERVER_MODE
 bool NetServer::StartBroadcast() {
-	if(!net_evbase)
+	if(!net_evbase || !broadcast_enabled)
 		return false;
 	SOCKET udp = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	int opt = TRUE;

@@ -17,15 +17,14 @@ private:
 	}
 
 public:
+	static bool StartServer(unsigned short port, unsigned int ip = 0, unsigned short* out_actual_port = nullptr, bool enable_broadcast = true);
 #ifdef YGOPRO_SERVER_MODE
 	static event_base* net_evbase;
 	static void InitDuel();
-	static unsigned short StartServer(unsigned short port);
+	static bool IsCanIncreaseTime(unsigned short gameMsg, const void* pdata, unsigned int len);
 	static void StopServer();
 	static void StopListen();
-	static bool IsCanIncreaseTime(unsigned short gameMsg, const void* pdata, unsigned int len);
 #else
-	static bool StartServer(unsigned short port);
 	static bool StartBroadcast();
 	static void StopServer();
 	static void StopBroadcast();
