@@ -1,7 +1,7 @@
 #include "config.h"
 #include "game.h"
 #ifdef YGOPRO_SERVER_MODE
-#include "myfilesystem.h"
+#include "file_system.h"
 #include "data_manager.h"
 #include "deck_manager.h"
 #include "replay.h"
@@ -15,7 +15,7 @@ namespace irr {
 }
 #endif
 #else
-#include "myfilesystem.h"
+#include "file_system.h"
 #include "image_manager.h"
 #include "data_manager.h"
 #include "deck_manager.h"

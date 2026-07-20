@@ -3,6 +3,8 @@
 #if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
 #include "client_card.h"
 #endif
+#include "file_system.h"
+#include <sqlite3.h>
 
 namespace ygo {
 
