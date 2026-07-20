@@ -1,7 +1,7 @@
 project "irrlicht"
     kind "StaticLib"
 
-    includedirs { "include", "source/Irrlicht" }
+    includedirs { "include", "source/Irrlicht", ZLIB_INCLUDE_DIR }
 
     defines {
         "_IRR_STATIC_LIB_",
