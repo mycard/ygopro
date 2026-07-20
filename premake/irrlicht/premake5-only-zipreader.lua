@@ -1,10 +1,11 @@
 project "irrlicht"
     kind "StaticLib"
 
-    includedirs { "include", "source/Irrlicht" }
+    includedirs { "include", "source/Irrlicht", ZLIB_INCLUDE_DIR }
 
     defines {
         "_IRR_STATIC_LIB_",
+        "NO_IRR_USE_NON_SYSTEM_ZLIB_",
         "NO_IRR_COMPILE_WITH_ZIP_ENCRYPTION_",
         "NO_IRR_COMPILE_WITH_BZIP2_",
         "NO_IRR_COMPILE_WITH_LZMA_",

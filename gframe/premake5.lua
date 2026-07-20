@@ -16,7 +16,7 @@ project "ygopro"
     includedirs { "../ocgcore", EVENT_INCLUDE_DIR, SQLITE_INCLUDE_DIR, LZMA_INCLUDE_DIR, ZLIB_INCLUDE_DIR }
     links { "ocgcore", "lzma", LUA_LIB_NAME, "sqlite3", "event" }
     if SERVER_ZIP_SUPPORT then
-        defines { "SERVER_ZIP_SUPPORT" }
+        defines { "SERVER_ZIP_SUPPORT", "_IRR_STATIC_LIB_" }
         includedirs { IRRLICHT_INCLUDE_DIR, IRRLICHT_SOURCE_DIR }
         links { "irrlicht" }
         if BUILD_ZLIB then
