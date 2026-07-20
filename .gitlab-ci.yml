@@ -84,31 +84,18 @@ mat_submodules:
 #    paths:
 #      - irrlicht
 
-.mat_macos:
+mat_macos:
   stage: prepare
   tags:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O premake.tar.gz $PREMAKE_URL
-    - echo "$PREMAKE_SHA256  premake.tar.gz" | sha256sum -c -
+    - wget -O premake.tar.gz https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-macosx.tar.gz
     - tar zxf premake.tar.gz
     - chmod +x premake5
   artifacts:
     paths:
       - premake5
-
-mat_macos_x64:
-  extends: .mat_macos
-  variables:
-    PREMAKE_URL: https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-macosx-x64.tar.gz
-    PREMAKE_SHA256: 84b5fa5a432dcebdc3dd12e8677d10e38e5b32a3fe06d83ae68967e4f5e2db8a
-
-mat_macos_arm64:
-  extends: .mat_macos
-  variables:
-    PREMAKE_URL: https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-macosx.tar.gz
-    PREMAKE_SHA256: fa73a46f093fa6f17494a3d063421aa6cae3ea825a61c62dd59fc2f07a256d03
 
 mat_windows:
   stage: prepare
@@ -228,6 +215,7 @@ exec_debian:
   extends: .exec_unix_common
   dependencies:
     - mat_common
+    - mat_macos
     - mat_submodules
   variables:
     PREMAKE5_BIN: ./premake5
@@ -242,10 +230,6 @@ exec_macos_x64:
   extends: .exec_macos_platform
   tags:
     - macos
-  dependencies:
-    - mat_common
-    - mat_macos_x64
-    - mat_submodules
   variables:
     RELEASE_DIR: macos-x64
 
@@ -253,10 +237,6 @@ exec_macos_arm64:
   extends: .exec_macos_platform
   tags:
     - macos-m1
-  dependencies:
-    - mat_common
-    - mat_macos_arm64
-    - mat_submodules
   variables:
     RELEASE_DIR: macos-arm64
 
