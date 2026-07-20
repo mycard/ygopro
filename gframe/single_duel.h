@@ -31,6 +31,7 @@ public:
 #ifdef YGOPRO_SERVER_MODE
 	void RequestField(DuelPlayer* dp) override;
 #endif
+	void TimerTick() override;
 	void EndDuel() override;
 	void OnPlayerDisconnected(DuelPlayer* dp) override;
 	
@@ -53,8 +54,6 @@ public:
 	void RefreshSingle(int player, int location, int sequence, int flag = 0xf81fff);
 
 	static uint32_t MessageHandler(intptr_t fduel, uint32_t type);
-	static void SingleTimer(evutil_socket_t fd, short events, void* arg);
-
 private:
 	int WriteUpdateData(int player, int location, unsigned int flag, unsigned char*& qbuf, int use_cache);
 	
@@ -81,11 +80,11 @@ protected:
 	unsigned char duel_count{ 0 };
 	unsigned char tp_player{ 0 };
 	unsigned char match_result[3]{};
-	short time_limit[2]{};
-	short time_elapsed{ 0 };
+	uint16_t time_limit[2]{};
+	uint16_t time_elapsed{ 0 };
 #ifdef YGOPRO_SERVER_MODE
-	short time_compensator[2]{};
-	short time_backed[2]{};
+	uint32_t time_compensator[2]{};
+	uint16_t time_backed[2]{};
 	unsigned char last_game_msg{ 0 };
 #endif
 };

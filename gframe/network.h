@@ -226,11 +226,11 @@ public:
 #ifdef YGOPRO_SERVER_MODE
 	virtual void RequestField(DuelPlayer* dp) = 0;
 #endif
+	virtual void TimerTick() = 0;
 	virtual void EndDuel() = 0;
 	virtual void OnPlayerDisconnected(DuelPlayer* dp) = 0;
 
 public:
-	event* etimer { nullptr };
 	DuelPlayer* host_player{ nullptr };
 	HostInfo host_info;
 	int duel_stage{};
