@@ -24,15 +24,17 @@ public:
 	static bool IsCanIncreaseTime(unsigned short gameMsg, const void* pdata, unsigned int len);
 	static void StopServer();
 	static void StopListen();
+	static void StartDuelTimer();
+	static void StopDuelTimer();
 #else
 	static bool StartBroadcast();
 	static void StopServer();
 	static void StopBroadcast();
 	static void StopListen();
-	static void BroadcastEvent(evutil_socket_t fd, short events, void* arg);
-#endif //YGOPRO_SERVER_MODE
 	static void StartDuelTimer();
 	static void StopDuelTimer();
+	static void BroadcastEvent(evutil_socket_t fd, short events, void* arg);
+#endif //YGOPRO_SERVER_MODE
 	static void ServerAccept(evconnlistener* listener, evutil_socket_t fd, sockaddr* address, int socklen, void* ctx);
 	static void ServerAcceptError(evconnlistener *listener, void* ctx);
 	static void ServerEchoRead(bufferevent* bev, void* ctx);
