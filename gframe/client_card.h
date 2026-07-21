@@ -8,9 +8,11 @@
 
 namespace ygo {
 
+class ClientField;
+
 class ClientCard {
-public:
 #ifndef YGOPRO_SERVER_MODE
+public:
 	irr::core::matrix4 mTransform;
 	irr::core::vector3df curPos;
 	irr::core::vector3df curRot;
@@ -74,13 +76,16 @@ public:
 	wchar_t lscstring[16]{};
 	wchar_t rscstring[16]{};
 
-	ClientCard() = default;
+	ClientCard(ClientField* field);
 	~ClientCard();
 	void SetCode(unsigned int x);
 	void UpdateInfo(unsigned char* buf);
 	void ClearTarget();
 	void ClearData();
 	static bool client_card_sort(ClientCard* c1, ClientCard* c2);
+
+private:
+	ClientField* field_{};
 #endif //YGOPRO_SERVER_MODE
 };
 
