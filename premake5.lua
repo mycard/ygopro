@@ -415,6 +415,9 @@ if IsServerUsedDep(dep.name) then
 end
 end
 
+if SERVER_MODE then
+    USE_DXSDK = false
+else
 if GetParam("no-dxsdk") then
     USE_DXSDK = false
 end
@@ -423,6 +426,7 @@ if USE_DXSDK and os.istarget("windows") then
         print("::warning:: DXSDK_DIR environment variable not set, it seems you don't have the DirectX SDK installed. DirectX mode will be disabled.")
         USE_DXSDK = false
     end
+end
 end
 
 if GetParam("no-audio") then
