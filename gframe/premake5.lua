@@ -13,18 +13,10 @@ project "ygopro"
             "netserver.cpp", "netserver.h",
             "single_duel.cpp", "single_duel.h",
             "tag_duel.cpp", "tag_duel.h" }
-    includedirs { "../ocgcore", EVENT_INCLUDE_DIR, SQLITE_INCLUDE_DIR, LZMA_INCLUDE_DIR, ZLIB_INCLUDE_DIR }
-    links { "ocgcore", "lzma", LUA_LIB_NAME, "sqlite3", "event" }
+
     if SERVER_ZIP_SUPPORT then
         defines { "SERVER_ZIP_SUPPORT", "_IRR_STATIC_LIB_" }
-        includedirs { IRRLICHT_INCLUDE_DIR, IRRLICHT_SOURCE_DIR }
-        links { "irrlicht" }
-        if BUILD_ZLIB then
-            links { "zlib" }
-        else
-            links { ZLIB_LIB_NAME }
-            libdirs { ZLIB_LIB_DIR }
-        end
+        includedirs { IRRLICHT_SOURCE_DIR }
     end
     if SERVER_PRO2_SUPPORT then
         defines { "SERVER_PRO2_SUPPORT" }
@@ -42,59 +34,33 @@ project "YGOPro"
 
     defines { "_IRR_STATIC_LIB_" }
     files { "*.cpp", "*.h" }
-    includedirs { "../ocgcore", EVENT_INCLUDE_DIR, IRRLICHT_INCLUDE_DIR, JPEG_INCLUDE_DIR, ZLIB_INCLUDE_DIR, LZMA_INCLUDE_DIR, SQLITE_INCLUDE_DIR }
-    links { "ocgcore", "lzma", "sqlite3", "irrlicht", "png", "freetype", "event" }
 end
 
-    if BUILD_LUA then
-        links { "lua" }
-    else
-        links { LUA_LIB_NAME }
-        libdirs { LUA_LIB_DIR }
-    end
+    includedirs { "../ocgcore" }
+    links { "ocgcore" }
 
-    if not BUILD_EVENT then
-        libdirs { EVENT_LIB_DIR }
-        links { "event_pthreads" }
-    end
-
-    if not BUILD_IRRLICHT then
-        libdirs { IRRLICHT_LIB_DIR }
-    end
-
-if not SERVER_MODE then
-    if BUILD_JPEG then
-        links { "jpeg" }
-    else
-        links { JPEG_LIB_NAME }
-        libdirs { JPEG_LIB_DIR }
-    end
-
-    if not BUILD_PNG then
-        libdirs { PNG_LIB_DIR }
-    end
-
-    if BUILD_ZLIB then
-        links { "zlib" }
-    else
-        links { ZLIB_LIB_NAME }
-        libdirs { ZLIB_LIB_DIR }
-    end
 
     if BUILD_FREETYPE then
-        includedirs { FREETYPE_CUSTOM_INCLUDE_DIR, FREETYPE_INCLUDE_DIR }
-    else
-        includedirs { FREETYPE_INCLUDE_DIR }
-        libdirs { FREETYPE_LIB_DIR }
+        -- Add custom include directory for FreeType before the default include directory
+        includedirs { FREETYPE_CUSTOM_INCLUDE_DIR }
     end
+
+    for _, dep in ipairs(DEPENDENCIES_METADATA) do
+if IsServerUsedDep(dep.name) then
+        local upper = string.upper(dep.name)
+        includedirs { _G[upper .. "_INCLUDE_DIR"] }
+        if _G["BUILD_" .. upper] then
+            -- When building from source, the dependencies will be linked with their project names, which can't be changed via options.
+            links { dep.name }
+        else
+            links { _G[upper .. "_LIB_NAME"] }
+            libdirs { _G[upper .. "_LIB_DIR"] }
+        end
 end
-
-    if not BUILD_SQLITE then
-        libdirs { SQLITE_LIB_DIR }
     end
 
-    if not BUILD_LZMA then
-        libdirs { LZMA_LIB_DIR }
+    if not BUILD_EVENT and not os.istarget("windows") then
+        links { EVENT_PTHREADS_LIB_NAME }
     end
 
 if not SERVER_MODE then
@@ -112,8 +78,8 @@ if not SERVER_MODE then
                 defines { "YGOPRO_MINIAUDIO_SUPPORT_OPUS_VORBIS" }
                 includedirs { MINIAUDIO_OPUS_INCLUDE_DIR, MINIAUDIO_VORBIS_INCLUDE_DIR }
                 if not MINIAUDIO_BUILD_OPUS_VORBIS then
-                    links { "opusfile", "vorbisfile", "opus", "vorbis", "ogg" }
-                    libdirs { OPUS_LIB_DIR, OPUSFILE_LIB_DIR, VORBIS_LIB_DIR, OGG_LIB_DIR }
+                    links { OPUSFILE_LIB_NAME, VORBISFILE_LIB_NAME, OPUS_LIB_NAME, VORBIS_LIB_NAME, OGG_LIB_NAME }
+                    libdirs { OPUSFILE_LIB_DIR, OPUS_LIB_DIR, VORBIS_LIB_DIR, OGG_LIB_DIR }
                 end
             end
         end
@@ -123,28 +89,28 @@ end
     filter "system:windows"
         entrypoint "mainCRTStartup"
         files "ygopro.rc"
-if SERVER_PRO2_SUPPORT then
-        targetname ("AI.Server")
-end
+        if SERVER_PRO2_SUPPORT then
+            targetname "AI.Server"
+        end
         links { "ws2_32", "iphlpapi", "winmm" }
         defines { "NOMINMAX=1", "WIN32_LEAN_AND_MEAN" }
 
     filter "not action:vs*"
         cppdialect "C++14"
 
-    filter "system:macosx"
 if not SERVER_MODE then
+    filter "system:macosx"
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework", "Carbon.framework" }
         defines { "GL_SILENCE_DEPRECATION" }
 end
 
     filter "system:linux"
-if not SERVER_MODE then
+if SERVER_MODE then
+        -- Support old GCC toolchains used by existing server deployments.
+        links { "pthread", "dl" }
+else
         links { "GL", "X11", "dl", "pthread" }
         if USE_OPENMP then
             linkoptions { "-fopenmp" }
         end
-end
-if SERVER_MODE then -- support old gcc
-        links { "pthread", "dl" }
-end
+    end
