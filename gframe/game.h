@@ -18,6 +18,11 @@
 #include <mutex>
 #include <functional>
 
+#ifdef _WIN32
+struct HWND__;
+using HWND = HWND__*;
+#endif
+
 namespace ygo {
 
 #ifndef YGOPRO_DEFAULT_DUEL_RULE

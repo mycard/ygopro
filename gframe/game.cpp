@@ -4,6 +4,7 @@
 #include "file_system.h"
 #include "data_manager.h"
 #include "deck_manager.h"
+#include "mysocket.h"
 #include "replay.h"
 #ifdef SERVER_ZIP_SUPPORT
 #include "CFileSystem.h"
@@ -29,6 +30,7 @@ namespace irr {
 #include <thread>
 #include <chrono>
 #ifdef _WIN32
+#include <windows.h>
 #include <timeapi.h>
 #else
 #include <spawn.h>
