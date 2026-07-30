@@ -19,7 +19,6 @@ _pack() {
     README.md
     lflist.conf
     strings.conf
-    system.conf
     load-once.conf
     cards.cdb
     script
