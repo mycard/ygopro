@@ -1,7 +1,7 @@
 #include "config.h"
 #include "menu_handler.h"
 #include "data_manager.h"
-#include "myfilesystem.h"
+#include "file_system.h"
 #include "netserver.h"
 #include "duelclient.h"
 #include "deck_manager.h"
@@ -64,26 +64,13 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				char port[6];
 				BufferIO::EncodeUTF8(hoststr, hostname);
 				BufferIO::EncodeUTF8(portstr, port);
-				unsigned int remote_addr = htonl(inet_addr(hostname));
-				if(remote_addr == INADDR_NONE) {
-					evutil_addrinfo hints{};
-					hints.ai_family = AF_INET;
-					hints.ai_socktype = SOCK_STREAM;
-					hints.ai_protocol = IPPROTO_TCP;
-					hints.ai_flags = EVUTIL_AI_ADDRCONFIG;
-					evutil_addrinfo* answer = nullptr;
-					if(evutil_getaddrinfo(hostname, port, &hints, &answer) != 0) {
-						mainGame->gMutex.lock();
-						soundManager.PlaySoundEffect(SOUND_INFO);
-						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1412));
-						mainGame->gMutex.unlock();
-						break;
-					}
-					char ip[20];
-					auto* sin = reinterpret_cast<sockaddr_in*>(answer->ai_addr);
-					evutil_inet_ntop(AF_INET, &sin->sin_addr, ip, sizeof(ip));
-					remote_addr = htonl(inet_addr(ip));
-					evutil_freeaddrinfo(answer);
+				unsigned int remote_addr = DuelClient::ResolveHostName(hostname, port);
+				if(remote_addr == 0) {
+					mainGame->gMutex.lock();
+					soundManager.PlaySoundEffect(SOUND_INFO);
+					mainGame->env->addMessageBox(L"", dataManager.GetSysString(1412));
+					mainGame->gMutex.unlock();
+					break;
 				}
 				unsigned int remote_port = std::wcstol(portstr, nullptr, 10);
 				BufferIO::CopyWideString(hoststr, mainGame->gameConf.lasthost);
@@ -319,24 +306,20 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				if(sel == -1)
 					break;
 				mainGame->bot_mode = true;
-#ifdef _WIN32
-				if(!NetServer::StartServer(mainGame->gameConf.serverport)) {
+				constexpr unsigned int localhost = 0x7f000001;
+				unsigned short bot_server_port = 0;
+				unsigned int bot_server_listen = localhost;
+				bool bot_server_public = mainGame->gameConf.bot_room_public;
+				if(bot_server_public) {
+					bot_server_port = mainGame->gameConf.serverport;
+					bot_server_listen = 0; // INADDR_ANY
+				}
+				if(!NetServer::StartServer(bot_server_port, bot_server_listen, &bot_server_port, bot_server_public)) {
 					soundManager.PlaySoundEffect(SOUND_INFO);
 					mainGame->env->addMessageBox(L"", dataManager.GetSysString(1402));
 					break;
 				}
-				if(!DuelClient::StartClient(0x7f000001, mainGame->gameConf.serverport)) {
-					NetServer::StopServer();
-					soundManager.PlaySoundEffect(SOUND_INFO);
-					mainGame->env->addMessageBox(L"", dataManager.GetSysString(1402));
-					break;
-				}
-				STARTUPINFOW si;
-				PROCESS_INFORMATION pi;
-				ZeroMemory(&si, sizeof(si));
-				si.cb = sizeof(si);
-				ZeroMemory(&pi, sizeof(pi));
-				wchar_t cmd[MAX_PATH];
+				std::vector<std::wstring> processArgs;
 				wchar_t arg1[512];
 				if(mainGame->botInfo[sel].select_deckfile) {
 					wchar_t botdeck[256];
@@ -345,51 +328,26 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				}
 				else
 					myswprintf(arg1, L"%ls", mainGame->botInfo[sel].command);
+				processArgs.push_back(arg1);
 				int flag = 0;
 				flag += (mainGame->chkBotHand->isChecked() ? 0x1 : 0);
-				myswprintf(cmd, L"Bot.exe \"%ls\" %d %d", arg1, flag, mainGame->gameConf.serverport);
-				if(!CreateProcessW(nullptr, cmd, nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
-				{
+				processArgs.push_back(std::to_wstring(flag));
+				processArgs.push_back(std::to_wstring(bot_server_port));
+#ifdef _WIN32
+				std::wstring executableName = L"Bot.exe";
+#else
+				std::wstring executableName = L"./bot";
+#endif
+				mainGame->pending_bot_executable = executableName;
+				mainGame->pending_bot_args = processArgs;
+				if(!DuelClient::StartClient(localhost, bot_server_port)) {
+					mainGame->pending_bot_executable.clear();
+					mainGame->pending_bot_args.clear();
 					NetServer::StopServer();
+					soundManager.PlaySoundEffect(SOUND_INFO);
+					mainGame->env->addMessageBox(L"", dataManager.GetSysString(1402));
 					break;
 				}
-				CloseHandle(pi.hThread);
-				CloseHandle(pi.hProcess);
-#else
-				if(fork() == 0) {
-					usleep(100000);
-					wchar_t warg1[512];
-					if(mainGame->botInfo[sel].select_deckfile) {
-						wchar_t botdeck[256];
-						DeckManager::GetDeckFile(botdeck, mainGame->cbBotDeckCategory->getSelected(), mainGame->cbBotDeckCategory->getText(), mainGame->cbBotDeck->getText());
-						myswprintf(warg1, L"%ls DeckFile='%ls'", mainGame->botInfo[sel].command, botdeck);
-					}
-					else
-						myswprintf(warg1, L"%ls", mainGame->botInfo[sel].command);
-					char arg1[512];
-					BufferIO::EncodeUTF8(warg1, arg1);
-					int flag = 0;
-					flag += (mainGame->chkBotHand->isChecked() ? 0x1 : 0);
-					char arg2[8];
-					mysnprintf(arg2, "%d", flag);
-					char arg3[8];
-					mysnprintf(arg3, "%d", mainGame->gameConf.serverport);
-					execl("./bot", "bot", arg1, arg2, arg3, nullptr);
-					std::exit(0);
-				} else {
-					if(!NetServer::StartServer(mainGame->gameConf.serverport)) {
-						soundManager.PlaySoundEffect(SOUND_INFO);
-						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1402));
-						break;
-					}
-					if(!DuelClient::StartClient(0x7f000001, mainGame->gameConf.serverport)) {
-						NetServer::StopServer();
-						soundManager.PlaySoundEffect(SOUND_INFO);
-						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1402));
-						break;
-					}
-				}
-#endif
 				mainGame->btnStartBot->setEnabled(false);
 				mainGame->btnBotCancel->setEnabled(false);
 				break;
