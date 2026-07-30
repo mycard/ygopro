@@ -15,30 +15,30 @@ mat_common:
     - linux
   script:
     # lua
-    - wget -O - https://mat-cacher.moenext.com/https://www.lua.org/ftp/lua-5.4.8.tar.gz | tar zfx -
+    - wget -O - https://mat-cacher.moenext.com/https://www.lua.org/ftp/lua-5.4.8.tar.gz?sha256sum=4f18ddae154e793e46eeab727c59ef1c0c0c2b744e7b94219710d76f530629ae | tar zfx -
     - mv lua-5.4.8 lua
     # sqlite3
-    - wget -O - https://mat-cacher.moenext.com/https://www.sqlite.org/2026/sqlite-autoconf-3510300.tar.gz | tar zfx -
-    - mv sqlite-autoconf-3510300 sqlite3
+    - wget -O - https://mat-cacher.moenext.com/https://www.sqlite.org/2026/sqlite-autoconf-3530300.tar.gz?sha256sum=c917d7db16648ec95f714974ace5e5dcf46b7dc70e26600a0a102a3141125db0 | tar zfx -
+    - mv sqlite-autoconf-3530300 sqlite3
     # freetype
-    - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/freetype/freetype-2.14.2.tar.gz | tar zfx -
-    - mv freetype-2.14.2 freetype
+    - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/freetype/freetype-2.14.3.tar.gz?sha256sum=e61b31ab26358b946e767ed7eb7f4bb2e507da1cfefeb7a8861ace7fd5c899a1 | tar zfx -
+    - mv freetype-2.14.3 freetype
     # event
-    - wget -O - https://mat-cacher.moenext.com/https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz | tar zfx -
-    - mv libevent-2.1.12-stable event
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/libevent/libevent/releases/download/release-2.1.13-stable/libevent-2.1.13-stable.tar.gz?sha256sum=f7e9383b8c0baa81b687e5b5eecc01beefaf1b19b64151d95ed61647fe7a315c | tar zfx -
+    - mv libevent-2.1.13-stable event
     # jpeg
-    - wget -O - https://mat-cacher.moenext.com/https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.1.4.1/libjpeg-turbo-3.1.4.1.tar.gz | tar zfx -
-    - mv libjpeg-turbo-3.1.4.1 jpeg
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.2.0/libjpeg-turbo-3.2.0.tar.gz?sha256sum=6f30092cef9fb839779646608f4ee14ae3cbac989c47fa05e841b0841f09878e | tar zfx -
+    - mv libjpeg-turbo-3.2.0 jpeg
     - cp jpeg/src/jversion.h.in jpeg/src/jversion.h
     # libpng
-    - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/libpng/libpng-1.6.58.tar.gz | tar zfx -
+    - wget -O - https://mat-cacher.moenext.com/https://downloads.sourceforge.net/libpng/libpng-1.6.58.tar.gz?sha256sum=8c9b05b675ca7301a458df2c2e46f26e1d41ff36b8863f8c33530bc58c2e6225 | tar zfx -
     - mv libpng-1.6.58 png
     - cp png/scripts/pnglibconf.h.prebuilt png/pnglibconf.h
     # zlib
-    - wget -O - https://mat-cacher.moenext.com/https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.gz | tar zfx -
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.gz?sha256sum=bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16 | tar zfx -
     - mv zlib-1.3.2 zlib
     # lzma
-    - wget -O - https://mat-cacher.moenext.com/https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz | tar zfx -
+    - wget -O - https://mat-cacher.moenext.com/https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.gz?sha256sum=3d3a1b973af218114f4f889bbaa2f4c037deaae0c8e815eec381c3d546b974a0 | tar zfx -
     - mv xz-5.8.3 lzma
     # irrlicht
     - ./.ci/prepare-irrlicht.sh
@@ -109,9 +109,9 @@ mat_windows:
     - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-windows.zip
     - 7z x -y premake-5.0.0-beta8-windows.zip
     # nasm.exe
-    - wget https://mat-cacher.moenext.com/https://www.nasm.us/pub/nasm/releasebuilds/3.01/win64/nasm-3.01-win64.zip
-    - 7z x -y nasm-3.01-win64.zip
-    - cp nasm-3.01/nasm.exe .
+    - wget -O nasm-3.02-win64.zip https://mat-cacher.moenext.com/https://www.nasm.us/pub/nasm/releasebuilds/3.02/win64/nasm-3.02-win64.zip?sha256sum=161d0bfaff53c2f9e9f3e69fd0672323ebabafd1268976a5cec11be92a19aee7
+    - 7z x -y nasm-3.02-win64.zip
+    - cp nasm-3.02/nasm.exe .
   artifacts:
     paths:
       - premake5.exe
@@ -331,27 +331,6 @@ assets_en-US:
       - pics
       - cards.cdb
       - strings.conf
-      - mat_submodules
-  only:
-    - tags
-    - gitlabci
-
-pack_windows_zh-CN:
-  stage: pack
-  tags:
-    - linux
-  dependencies:
-    - assets
-    - assets_windows
-    - exec_windows
-    - assets_zh-CN
-    - mat_submodules
-  script: ./.ci/pack-windows.sh
-  variables:
-    TARGET_LOCALE: zh-CN
-  artifacts:
-    paths:
-      - dist
   only:
     - tags
     - gitlabci
