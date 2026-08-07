@@ -5,6 +5,10 @@
 #endif
 #include "file_system.h"
 #include <sqlite3.h>
+#ifdef SERVER_ZIP_SUPPORT
+#include <IFileSystem.h>
+#include <IReadFile.h>
+#endif
 
 namespace ygo {
 
