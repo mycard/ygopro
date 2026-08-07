@@ -1,8 +1,6 @@
 #ifndef YGOPRO_CONFIG_H
 #define YGOPRO_CONFIG_H
 
-#define IRR_COMPILE_WITH_DX9_DEV_PACK
-
 #include <cerrno>
 #include <cstdio>
 #include <string>
@@ -38,10 +36,6 @@ template<typename T>
 inline T myclamp(T v, T lo, T hi) {
 	return (v < lo) ? lo : (hi < v) ? hi : v;
 }
-
-#if !defined(YGOPRO_SERVER_MODE) || defined(SERVER_ZIP_SUPPORT)
-#include <irrlicht.h>
-#endif
 
 constexpr uint16_t PRO_VERSION = 0x1362;
 
