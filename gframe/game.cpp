@@ -22,7 +22,6 @@ namespace irr {
 #include "data_manager.h"
 #include "deck_manager.h"
 #include "sound_manager.h"
-#include "replay.h"
 #include "materials.h"
 #include "duelclient.h"
 #include "netserver.h"
