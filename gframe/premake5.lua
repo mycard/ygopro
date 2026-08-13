@@ -92,7 +92,6 @@ if not SERVER_MODE then
 end
 
     filter "system:windows"
-        entrypoint "mainCRTStartup"
         files "ygopro.rc"
         if SERVER_PRO2_SUPPORT then
             targetname "AI.Server"

@@ -29,20 +29,17 @@ void ClickButton(irr::gui::IGUIElement* btn) {
 }
 #endif //YGOPRO_SERVER_MODE
 
-int main(int argc, char* argv[]) {
-#if defined(_WIN32)
-	std::setlocale(LC_CTYPE, ".UTF-8");
-#elif defined(__APPLE__)
-	std::setlocale(LC_CTYPE, "UTF-8");
+#ifdef YGOPRO_SERVER_MODE
+static int servermain(int argc, const char* const argv[]) {
 #else
-	std::setlocale(LC_CTYPE, "");
+static int mymain(int wargc, const wchar_t* const wargv[]) {
 #endif
 #ifndef YGOPRO_SERVER_MODE
 #ifdef __APPLE__
 	ygo::Game::FixMacOSBundleWorkingDirectory();
 #endif //__APPLE__
 #ifdef _WIN32
-	if (argc == 2 && (ygo::IsExtension(argv[1], ".ydk") || ygo::IsExtension(argv[1], ".yrp"))) { // open file from explorer
+	if (wargc == 2 && (ygo::IsExtension(wargv[1], L".ydk") || ygo::IsExtension(wargv[1], L".yrp"))) { // open file from explorer
 		wchar_t exepath[MAX_PATH];
 		GetModuleFileNameW(nullptr, exepath, MAX_PATH);
 		wchar_t* p = std::wcsrchr(exepath, L'\\');
@@ -146,19 +143,6 @@ int main(int argc, char* argv[]) {
 	ygo::mainGame = &_game;
 	if(!ygo::mainGame->Initialize())
 		return EXIT_FAILURE;
-
-#ifdef _WIN32
-	int wargc = 0;
-	std::unique_ptr<wchar_t*[], void(*)(wchar_t**)> wargv(CommandLineToArgvW(GetCommandLineW(), &wargc), [](wchar_t** wargv) {
-		LocalFree(wargv);
-	});
-#else
-	int wargc = argc;
-	auto wargv = std::make_unique<wchar_t[][256]>(wargc);
-	for(int i = 0; i < argc; ++i) {
-		BufferIO::DecodeUTF8(argv[i], wargv[i]);
-	}
-#endif //_WIN32
 
 	bool keep_on_return = false;
 	bool deckCategorySpecified = false;
@@ -290,3 +274,53 @@ int main(int argc, char* argv[]) {
 #endif //YGOPRO_SERVER_MODE
 	return EXIT_SUCCESS;
 }
+
+#ifdef _WIN32
+
+int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
+	std::setlocale(LC_CTYPE, ".UTF-8");
+	int wargc = 0;
+	std::unique_ptr<wchar_t*[], void(*)(wchar_t**)> wargv(CommandLineToArgvW(GetCommandLineW(), &wargc), [](wchar_t** wargv) {
+		LocalFree(wargv);
+	});
+	if(!wargv)
+		return EXIT_FAILURE;
+#ifdef YGOPRO_SERVER_MODE
+	std::vector<std::string> utf8_arguments;
+	utf8_arguments.reserve(wargc);
+	for(int i = 0; i < wargc; ++i)
+		utf8_arguments.emplace_back(BufferIO::EncodeUTF8String(wargv[i]));
+	std::vector<const char*> argv;
+	argv.reserve(wargc);
+	for(const auto& argument : utf8_arguments)
+		argv.emplace_back(argument.c_str());
+	return servermain(wargc, argv.data());
+#else
+	return mymain(wargc, wargv.get());
+#endif
+}
+
+#else
+
+int main(int argc, char* argv[]) {
+#ifdef __APPLE__
+	std::setlocale(LC_CTYPE, "UTF-8");
+#else
+	std::setlocale(LC_CTYPE, "");
+#endif
+#ifdef YGOPRO_SERVER_MODE
+	return servermain(argc, argv);
+#else
+	std::vector<std::wstring> wide_arguments;
+	wide_arguments.reserve(argc);
+	for(int i = 0; i < argc; ++i)
+		wide_arguments.emplace_back(BufferIO::DecodeUTF8String(argv[i]));
+	std::vector<const wchar_t*> wargv;
+	wargv.reserve(argc);
+	for(const auto& argument : wide_arguments)
+		wargv.emplace_back(argument.c_str());
+	return mymain(argc, wargv.data());
+#endif
+}
+
+#endif //_WIN32
