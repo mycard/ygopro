@@ -1,6 +1,11 @@
 if SERVER_MODE then
 project "ygopro"
-    kind "ConsoleApp"
+    filter "system:windows"
+        kind "WindowedApp"
+    filter "system:not windows"
+        kind "ConsoleApp"
+    filter {}
+
     cppdialect "C++14"
 
     defines { "YGOPRO_SERVER_MODE" }
