@@ -2,15 +2,15 @@
 
 [![GitHub Actions](https://github.com/mycard/ygopro/actions/workflows/server.yml/badge.svg?branch=server)](https://github.com/mycard/ygopro/actions/workflows/server.yml)
 
-YGOPro 的一个服务端版本。程序启动后会自动建立主机并监听端口，供 YGOPro 客户端连接；现用于[萌卡](https://mycard.world/)等项目。
+YGOPro 的一个服务端版本。程序启动后会自动建立主机并监听端口，供 YGOPro 客户端连接；现用于 [SRVPro](https://github.com/mycard/srvpro) 和[萌卡](https://mycard.world/)等项目。
 
 ## 获取开发版
 
-`server` 分支的 Windows x64 开发版由 GitHub Actions 自动构建并发布到 [`server-latest`](https://github.com/mycard/ygopro/releases/tag/server-latest)。其中 `ygopro.exe` 为默认服务端程序，`AI.Server.exe` 为 YGOPro 2 人机模式专用。
+Windows x64 开发版由 GitHub Actions 自动构建并发布到 [`server-latest`](https://github.com/mycard/ygopro/releases/tag/server-latest)。其中 `ygopro.exe` 为默认服务端程序，`AI.Server.exe` 为 YGOPro 2 人机模式专用。
 
 ## 编译
 
-依赖版本、下载地址及完整准备过程以 [`.github/workflows/server.yml`](https://github.com/mycard/ygopro/blob/server/.github/workflows/server.yml) 为准。
+_依赖版本、下载地址及完整准备过程以 [`.github/workflows/server.yml`](https://github.com/mycard/ygopro/blob/server/.github/workflows/server.yml) 为准。_
 
 使用 [Premake](https://premake.github.io/) 生成 Makefile 或 Visual Studio 解决方案后，即可使用对应的构建工具进行编译。
 
@@ -64,11 +64,11 @@ macOS 使用 Clang，准备 Lua 源码并安装 libevent、SQLite 和 liblzma �
 
 ## 运行
 
-推荐使用 [srvpro](https://github.com/mycard/srvpro) 管理服务端进程。
+推荐使用 [SRVPro](https://github.com/mycard/srvpro) 管理服务端进程。
 
 直接运行时也可以不传参数，以默认配置快速测试，程序在此时默认监听 7911 端口并将端口号输出到 `stdout`，可以使用 YGOPro 客户端连接。
 
-**在 Windows 上直接运行 `ygopro.exe` 时，因程序被编译为窗口程序但不创建窗口，不会看到任何输出，也不会附加控制台。**应通过其他方式读取 `stdout` 输出，例如使用 PowerShell：
+**在 Windows 上直接运行 `ygopro.exe` 时，因程序被编译为窗口程序但不创建窗口，不会看到任何输出，也不会附加控制台。** 应通过其他方式读取 `stdout` 输出，例如使用 PowerShell：
 
 ```powershell
 .\ygopro.exe 2>&1 | Out-Host
