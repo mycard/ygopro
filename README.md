@@ -43,6 +43,15 @@ make -C build -j4 config=release
 
 产物位于 `bin/release/ygopro`。也可以使用 `--build-sqlite --build-event --build-lzma` 从源码静态构建这些依赖。
 
+在 Debian/Ubuntu 上，APT 提供的 Lua 库 (liblua5.4-dev) 包含了预编译的 C++ 版本，可以通过 `--lua-deb` 快速调用，此时不需要准备 `lua/` 源码目录：
+
+```sh
+sudo apt-get update
+sudo apt-get install -y build-essential liblua5.4-dev libevent-dev libsqlite3-dev liblzma-dev
+./premake5 gmake --lua-deb
+make -C build -j4 config=release
+```
+
 ### Windows
 
 GitHub Actions 当前使用 Visual Studio 2022。准备好依赖源码后，在 Developer Command Prompt 中复制 Premake 文件和 libevent 的 Windows 配置头，再生成解决方案：
