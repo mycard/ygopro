@@ -94,7 +94,7 @@ mat_macos:
   tags:
     - linux
   script:
-    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-macosx.tar.gz | tar zfx -
+    - wget -O - https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-macosx.tar.gz | tar zfx -
     - chmod +x premake5
   artifacts:
     paths:
@@ -106,8 +106,8 @@ mat_windows:
     - linux
   script:
     # premake5.exe
-    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-windows.zip
-    - 7z x -y premake-5.0.0-beta8-windows.zip
+    - wget https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-windows.zip
+    - 7z x -y premake-5.0.0-windows.zip
     # nasm.exe
     - wget -O nasm-3.02-win64.zip https://mat-cacher.moenext.com/https://www.nasm.us/pub/nasm/releasebuilds/3.02/win64/nasm-3.02-win64.zip?sha256sum=161d0bfaff53c2f9e9f3e69fd0672323ebabafd1268976a5cec11be92a19aee7
     - 7z x -y nasm-3.02-win64.zip
