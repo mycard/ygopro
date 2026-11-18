@@ -80,7 +80,7 @@ mat_macos:
     - linux
   script:
     - apt update; apt -y install wget tar
-    - wget -O premake.tar.gz https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-beta8-macosx.tar.gz
+    - wget -O premake.tar.gz https://cdn02.moecube.com:444/premake5-built/premake-5.0.0-macosx.tar.gz
     - tar zxf premake.tar.gz
     - chmod +x premake5
   artifacts:
@@ -94,7 +94,7 @@ mat_windows:
   script:
     - apt update; apt -y install wget tar patch p7zip-full
     # premake5.exe
-    - wget -O premake-windows.zip https://mat-cacher.moenext.com/https://github.com/premake/premake-core/releases/download/v5.0.0-beta8/premake-5.0.0-beta8-windows.zip?sha256sum=e64ce2ed8778e0098f63674cca61fe33941b5f0c8d9a4afd651152bdea3758ab
+    - wget -O premake-windows.zip https://mat-cacher.moenext.com/https://github.com/premake/premake-core/releases/download/v5.0.0/premake-5.0.0-windows.zip?sha256sum=15e63506eed5dfd526b96c8e957a7feff2be6cfe70f46e353bfe4813b82e2fdc
     - 7z x -y premake-windows.zip
   artifacts:
     paths:
