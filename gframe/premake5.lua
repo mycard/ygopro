@@ -107,6 +107,12 @@ end
     filter "not action:vs*"
         cppdialect "C++14"
 
+    filter { "system:windows", "action:gmake" }
+if not SERVER_MODE then
+        links { "opengl32", "imm32" }
+end
+        linkoptions { "-static" }
+
 if not SERVER_MODE then
     filter "system:macosx"
         links { "OpenGL.framework", "Cocoa.framework", "IOKit.framework", "Carbon.framework" }
@@ -119,7 +125,4 @@ if SERVER_MODE then
         links { "pthread", "dl" }
 else
         links { "GL", "X11", "dl", "pthread" }
-        if USE_OPENMP then
-            linkoptions { "-fopenmp" }
-        end
     end

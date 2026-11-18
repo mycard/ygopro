@@ -50,9 +50,9 @@ if os.istarget("linux") then
 end
 end
 
--- os.hostarch() actually returns the architecture of Premake5, and the official Windows build of Premake5 is 32-bit,
--- so we can only distinguish between AARCH64 and x86, and must use the ARM build of Premake5 on ARM platforms.
-PREMAKE_ARCH = os.hostarch()
+-- On Linux and macOS, builds target the current machine's CPU architecture by default, but Premake needs an explicit
+-- architecture for the corresponding filters to take effect, so use os.hostarch() to detect it.
+HOST_ARCH = os.hostarch()
 
 -- Return val if it's not nil; otherwise, return default.
 local function ifnil(val, default)
@@ -114,7 +114,7 @@ end
 -- Fields:
 --   name (will resolve to global variable prefix)
 --   prebuilt_header (for finding directory)
---   prebuilt_header_subdir (for FindHeaderWithSubDir)
+--   prebuilt_header_subdir (for dependencies which require a subdirectory in the compiler's include path)
 --   prebuilt_libname (for prebuilt dependencies only; default: same as name)
 --   source_dir (when building dependency from source, its code should be in this directory relative to the project root; default: ./name)
 --   source_header_subdir (dependency's header subdirectory relative to source_dir; default: .)
@@ -131,7 +131,7 @@ DEPENDENCIES_METADATA = {
     },
     {
         name = "freetype",
-        prebuilt_header = "freetype2/ft2build.h",
+        prebuilt_header = "ft2build.h",
         prebuilt_header_subdir = "freetype2",
         source_header_subdir = "include",
     },
@@ -173,12 +173,12 @@ DEPENDENCIES_METADATA = {
 MINIAUDIO_DEPENDENCIES_METADATA = {
     {
         name = "opus",
-        prebuilt_header = "opus/opus.h",
+        prebuilt_header = "opus.h",
         prebuilt_header_subdir = "opus",
     },
     {
         name = "opusfile",
-        prebuilt_header = "opus/opusfile.h",
+        prebuilt_header = "opusfile.h",
         prebuilt_header_subdir = "opus",
     },
     {
@@ -315,14 +315,6 @@ local function GetParam(param)
     return ifnil(_OPTIONS[param], os.getenv(string.upper(string.gsub(param,"-","_"))))
 end
 
-local function FindHeaderWithSubDir(header, subdir)
-    local result = os.findheader(header)
-    if result and subdir then
-        result = path.join(result, subdir)
-    end
-    return result
-end
-
 local function ResolveDirectoryVariableToFullPath(varname)
     local dir = _G[varname]
     if not dir or dir == "" then
@@ -342,7 +334,14 @@ local function ResolvePreBuiltDependencyDirectory(dep)
     local include_dir_var = upper .. "_INCLUDE_DIR"
     local lib_name_var = upper .. "_LIB_NAME"
     local lib_dir_var = upper .. "_LIB_DIR"
-    _G[include_dir_var] = GetParam(dep.name .. "-include-dir") or FindHeaderWithSubDir(dep.prebuilt_header, dep.prebuilt_header_subdir)
+    _G[include_dir_var] = GetParam(dep.name .. "-include-dir")
+    if not _G[include_dir_var] then
+        if dep.prebuilt_header_subdir then
+            _G[include_dir_var] = os.findsubdirheader(dep.prebuilt_header, dep.prebuilt_header_subdir)
+        else
+            _G[include_dir_var] = os.findheader(dep.prebuilt_header)
+        end
+    end
     _G[lib_name_var] = GetParam(dep.name .. "-lib-name") or dep.prebuilt_libname or dep.name
     _G[lib_dir_var] = GetParam(dep.name .. "-lib-dir") or os.findlib(_G[lib_name_var])
     ResolveDirectoryVariableToFullPath(include_dir_var)
@@ -478,8 +477,8 @@ if os.istarget("macosx") then
     end
 end
 
-if not mac_arm and not mac_intel and table.indexof({ "x86", "x86_64", "ARM64" }, PREMAKE_ARCH) == nil then
-    print("::warning:: Detected architecture '" .. PREMAKE_ARCH .. "' is not recognized. Proceeding with the build; SIMD will be disabled.")
+if not mac_arm and not mac_intel and table.indexof({ "x86", "x86_64", "ARM64" }, HOST_ARCH) == nil then
+    print("::warning:: Detected architecture '" .. HOST_ARCH .. "' is not recognized. Proceeding with the build; SIMD will be disabled.")
     USE_SIMD = "none"
 end
 
@@ -500,6 +499,23 @@ if GetParam("use-openmp") then
     end
 end
 
+-- workaround for irrlicht static library linking on gmake
+if _ACTION == "gmake" and os.istarget("windows")  then
+    local p = premake
+    local cpp = p.modules.gmake.cpp
+    local function customLinkCmd(cfg, toolset)
+        p.outln('LINKCMD = $(file >$(OBJDIR)/objects.rsp,$(OBJECTS)) $(AR) -rcs "$@" @$(OBJDIR)/objects.rsp')
+    end
+
+    p.override(cpp.elements, "configuration", function(base, cfg)
+        local calls = base(cfg)
+        if cfg.project.name == "irrlicht" and cfg.kind == p.STATICLIB then
+            table.replace(calls, cpp.linkCmd, customLinkCmd)
+        end
+        return calls
+    end)
+end
+
 ---- Premake workspace and project configuration
 
 workspace "YGOPro"
@@ -508,6 +524,7 @@ workspace "YGOPro"
     objdir "obj"
 
     configurations { "Release", "Debug" }
+    defaultconfiguration "Release"
 
 if SERVER_MODE then
     for _, numberOption in ipairs(numberOptions) do
@@ -532,6 +549,7 @@ if SERVER_MODE then
 else
         startproject "YGOPro"
 end
+        characterset "Unicode"
         -- Target Windows 7 or later. (Building requires Windows 10 SDK 1803 or newer.)
         defines { "WINVER=0x0601", "_WIN32_WINNT=0x0601" }
 
@@ -566,6 +584,9 @@ end
     filter { "system:windows", "action:vs*", "platforms:ARM64" }
         architecture "AARCH64"
 
+    filter { "system:windows", "action:gmake" }
+        architecture "x86_64"
+
     filter "system:macosx"
         systemversion "11"
         if mac_arm and mac_intel then
@@ -574,7 +595,7 @@ end
             mac_intel = false
         end
         if not mac_arm and not mac_intel then
-            if PREMAKE_ARCH == "ARM64" then
+            if HOST_ARCH == "ARM64" then
                 mac_arm = true
             else
                 mac_intel = true
@@ -590,7 +611,7 @@ end
 
     -- We need to specify architecture on Linux to make the premake filters work correctly.
     filter "system:linux"
-        if PREMAKE_ARCH == "ARM64" then
+        if HOST_ARCH == "ARM64" then
             architecture "AARCH64"
         else
             architecture "x86_64"
@@ -605,22 +626,22 @@ end
         defines "_DEBUG"
         targetdir "bin/debug"
 
-    filter { "system:windows", "platforms:Win32", "configurations:Release" }
+    filter { "system:windows", "action:vs*", "platforms:Win32", "configurations:Release" }
         targetdir "bin/release/x86"
 
-    filter { "system:windows", "platforms:Win32", "configurations:Debug" }
+    filter { "system:windows", "action:vs*", "platforms:Win32", "configurations:Debug" }
         targetdir "bin/debug/x86"
 
-    filter { "system:windows", "platforms:x64", "configurations:Release" }
+    filter { "system:windows", "action:vs*", "platforms:x64", "configurations:Release" }
         targetdir "bin/release/x64"
 
-    filter { "system:windows", "platforms:x64", "configurations:Debug" }
+    filter { "system:windows", "action:vs*", "platforms:x64", "configurations:Debug" }
         targetdir "bin/debug/x64"
 
-    filter { "system:windows", "platforms:ARM64", "configurations:Release" }
+    filter { "system:windows", "action:vs*", "platforms:ARM64", "configurations:Release" }
         targetdir "bin/release/arm64"
 
-    filter { "system:windows", "platforms:ARM64", "configurations:Debug" }
+    filter { "system:windows", "action:vs*", "platforms:ARM64", "configurations:Debug" }
         targetdir "bin/debug/arm64"
 
     filter { "configurations:Release", "action:vs*" }
@@ -662,12 +683,12 @@ end
 if SERVER_MODE and dep.name == "irrlicht" then
             include "irrlicht/premake5-only-zipreader.lua"
 else
-            include((dep.source_dir or dep.name) .. "/.")
+            include(dep.source_dir or dep.name)
 end
         end
     end
     if USE_AUDIO and not SERVER_MODE then
         if AUDIO_LIB == "miniaudio" then
-            include "miniaudio/."
+            include "miniaudio"
         end
     end
