@@ -1338,7 +1338,9 @@ void Game::LoadExpansions() {
 #if defined(SERVER_ZIP_SUPPORT) || !defined(YGOPRO_SERVER_MODE)
 	for(irr::u32 i = 0; i < dataManager.IrrFileSystem->getFileArchiveCount(); ++i) {
 		auto archive = dataManager.IrrFileSystem->getFileArchive(i)->getFileList();
+#ifndef YGOPRO_SERVER_MODE
 		auto packStart = deckBuilder.expansionPacks.size();
+#endif //YGOPRO_SERVER_MODE
 		for(irr::u32 j = 0; j < archive->getFileCount(); ++j) {
 			const char* name = archive->getFullFileName(j).c_str();
 			if (IsExtension(name, ".cdb")) {
@@ -1379,7 +1381,9 @@ void Game::LoadExpansions() {
 			}
 #endif // YGOPRO_SERVER_MODE
 		}
+#ifndef YGOPRO_SERVER_MODE
 		std::sort(deckBuilder.expansionPacks.begin() + packStart, deckBuilder.expansionPacks.end());
+#endif // YGOPRO_SERVER_MODE
 	}
 #endif //SERVER_ZIP_SUPPORT
 }
