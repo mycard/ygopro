@@ -19,6 +19,13 @@ namespace ygo {
 #define REPLAY_ID_YRP1	0x31707279
 #define REPLAY_ID_YRP2	0x32707279
 
+enum class ShuffleVersion : uint8_t {
+	None = 1,
+	MTRandom = 2,			// mtrandom with seed_sequence[0:8]
+	MTRandomWithSalt = 3,	// mtrandom with seed_sequence[0:8], 1
+	Other = 4,				// other than mtrandom
+};
+
 struct ReplayHeader {
 	uint32_t id{};
 	uint32_t version{};
@@ -32,10 +39,8 @@ struct ReplayHeader {
 struct ExtendedReplayHeader {
 	ReplayHeader base;
 	uint32_t seed_sequence[SEED_COUNT]{};
-	uint32_t header_version{ 1 };
-	uint32_t value1{};
-	uint32_t value2{};
-	uint32_t value3{};
+	uint8_t header_version{ 1 };
+	uint8_t value[15]{};
 };
 
 struct DuelParameters {
@@ -48,6 +53,7 @@ struct DuelParameters {
 // max size
 constexpr size_t MAX_REPLAY_SIZE = 0x80000;
 constexpr size_t MAX_COMP_SIZE = UINT16_MAX - 1 - sizeof(ExtendedReplayHeader); // UINT16_MAX - 1 : MAX_DATA_SIZE
+constexpr size_t SIZE_LZMA1_PROPS = 5;
 
 class Replay {
 public:
